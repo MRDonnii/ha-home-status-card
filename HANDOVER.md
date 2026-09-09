@@ -1,9 +1,10 @@
 # Handover
 
-- Version: 0.1.6
+- Version: 0.1.7
 - Formål: Én pakke med ét knapkort, der kan indsættes flere gange med en valgt specialfunktion.
 - Det eksisterende 4-kolonne-grid bevares; hver gammel knap erstattes af `custom:ha-home-status-card` med sit eget `preset`.
-- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.1.6`.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.1.7`.
+- 0.1.7 flytter sikkerhedskortets overskrift op og reducerer kun målerens lodrette afstand, så 2×2-blokken kan være der uden overlap eller ændret korthøjde.
 - 0.1.6 placerer sikkerhedskortets Verisure/Ajax og vindue/dør-indikatorer i et fast 2×2-grid i venstre side.
 - 0.1.5 genskaber tre faseforskudte sinuskurver i både husstrøm- og Tesla-kortet. Hver kurves amplitude, frekvens, farve og opacitet følger sin egen fases aktuelle belastning.
 - 0.1.4 genskaber varmekortets ikonrække: billigste varmekilde som VP/FJ/Mix-ikon og separat dynamisk brugsvandsikon. Linjen ovenover viser igen dagens varmeforbrug.
