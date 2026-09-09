@@ -1,4 +1,4 @@
-const VERSION = "0.1.4";
+const VERSION = "0.1.5";
 
 const PRESETS = {
   home_energy: {
@@ -7,6 +7,12 @@ const PRESETS = {
     color: "var(--state-info-icon, #38bdf8)",
     entity: "sensor.teknikrum_hovedmaler_power",
     vehicle_power_entity: "sensor.th_charger_effekt_normaliseret_kw",
+    phase_entities: [
+      "sensor.teknikrum_fase_a_power",
+      "sensor.teknikrum_fase_b_power",
+      "sensor.teknikrum_fase_c_power",
+    ],
+    phase_max: 3000,
     daily_entity: "sensor.dagligt_husforbrug_uden_bil",
     navigation_path: "/energi-overblik/energy",
     value_unit: "kW",
@@ -17,6 +23,13 @@ const PRESETS = {
     color: "var(--state-on-icon, #20e3a2)",
     entity: "sensor.energitte_battery",
     power_entity: "sensor.th_charger_effekt_normaliseret_kw",
+    phase_entities: [
+      "sensor.th_charger_current_phase_1",
+      "sensor.th_charger_current_phase_2",
+      "sensor.th_charger_current_phase_3",
+    ],
+    phase_max_entity: "sensor.th_charger_allocated_charge_current",
+    phase_max: 16,
     daily_entity: "sensor.tesla_daglig_ladning",
     navigation_path: "/teknik-overblik/ev-overblik",
     value_unit: "%",
@@ -377,7 +390,41 @@ class HaHomeStatusCard extends HTMLElement {
 
   decoration(item) {
     if (item.type === "home_energy" || item.type === "ev") {
-      return `<svg class="flow-lines ${item.type}" viewBox="0 0 220 85" preserveAspectRatio="none"><path d="M0 48 C28 12 48 78 78 42 S128 10 152 48 S194 76 220 35"/><path d="M0 58 C34 25 56 72 88 51 S139 22 168 56 S202 67 220 48"/></svg>`;
+      const maxFromEntity = this.number(item.phase_max_entity);
+      const maximum =
+        Number.isFinite(maxFromEntity) && maxFromEntity > 0
+          ? maxFromEntity
+          : item.phase_max;
+      const values = (item.phase_entities || []).map((id) =>
+        Math.max(0, this.number(id) || 0),
+      );
+      const colors = values.map((value) => {
+        const load = Math.min(1, value / maximum);
+        if (load < 0.08) return "var(--state-cool-icon)";
+        if (load < 0.22) return "var(--state-info-icon)";
+        if (load < 0.48) return "var(--state-success-icon)";
+        if (load < 0.72) return "var(--state-warning-icon)";
+        if (load < 0.88) return "var(--state-heat-icon)";
+        return "var(--state-error-icon)";
+      });
+      const paths = values.map((value, phase) => {
+        const load = Math.min(1, value / maximum);
+        const amplitude =
+          item.type === "ev" ? 1 + Math.pow(load, 1.8) * 23 : 3 + load * 26;
+        const cycles = 1.1 + load * 1.9;
+        const offset = (phase * Math.PI * 2) / 3;
+        const points = [];
+        for (let step = 0; step <= 120; step += 1) {
+          const progress = step / 120;
+          points.push(
+            `${(progress * 300).toFixed(1)},${(42.5 + Math.sin(progress * Math.PI * 2 * cycles + offset) * amplitude).toFixed(1)}`,
+          );
+        }
+        const opacity = (0.1 + load * 0.35).toFixed(2);
+        const width = (1 + load).toFixed(2);
+        return `<polyline class="phase phase-${phase + 1}" points="${points.join(" ")}" style="stroke:${colors[phase]};stroke-width:${width};opacity:${opacity}"/>`;
+      });
+      return `<svg class="phase-waves ${item.type}" viewBox="0 0 300 85" preserveAspectRatio="none"><line x1="0" y1="42.5" x2="300" y2="42.5"/>${paths.join("")}</svg>`;
     }
     if (item.type === "electricity_price") {
       return `<div class="price-bars">${[32, 46, 25, 58, 38, 65, 29].map((h, i) => `<i style="height:${h}%;animation-delay:-${i * 0.25}s"></i>`).join("")}</div>`;
@@ -442,7 +489,7 @@ class HaHomeStatusCard extends HTMLElement {
       .value{position:relative;z-index:2;font-size:18px;font-weight:750;line-height:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:38px}.meter{position:relative;z-index:2;display:flex;gap:4px;height:8px;margin:5px 0}.seg{width:14px;height:6px;border-radius:99px;background:color-mix(in srgb,var(--dashboard-icon-muted,#64748b) 25%,transparent)}.seg.on{background:var(--accent);box-shadow:0 0 7px color-mix(in srgb,var(--accent) 28%,transparent)}
       .detail{display:block;min-width:0;max-width:100%;position:relative;z-index:2;color:var(--gray600,var(--secondary-text-color,#a7b2c2));font-size:11px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:35px;box-sizing:border-box}.label{display:block;min-width:0;max-width:100%;position:relative;z-index:2;color:var(--gray700,var(--secondary-text-color,#cbd5e1));font-size:11px;font-weight:700;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:35px;box-sizing:border-box}.source-row{display:flex;align-items:center;gap:5px;height:14px}.source-row ha-icon{position:static;width:13px;height:13px;--mdc-icon-size:13px;flex:0 0 13px}.source-row b{line-height:1}.security-row{display:flex;align-items:center;gap:3px;height:17px}.security-row>span{display:flex;align-items:center;gap:1px;height:17px;padding:0 2px;border-radius:5px;background:color-mix(in srgb,var(--dashboard-icon-muted,#64748b) 9%,transparent)}.security-row img,.security-row ha-icon{position:static;width:12px;height:12px;--mdc-icon-size:12px;object-fit:contain}.security-row b{font-size:9px;line-height:1}
       .bg-icon{position:absolute;right:-10px;bottom:-10px;width:58px;height:58px;--mdc-icon-size:58px;color:var(--accent);opacity:.12;animation:drift 5s ease-in-out infinite;z-index:1;pointer-events:none;filter:saturate(1.05) drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 10%,transparent))}@keyframes drift{50%{transform:translate(-4px,-3px) scale(1.04) rotate(-4deg);opacity:.22}}
-      .flow-lines,.pool-waves{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.2;pointer-events:none}.flow-lines path,.pool-waves path{fill:none;stroke:var(--accent);stroke-width:1.7;stroke-linecap:round;animation:linePulse 3s ease-in-out infinite}.flow-lines path+path,.pool-waves path+path{animation-delay:-1.4s;opacity:.65}@keyframes linePulse{50%{opacity:.35;transform:translateY(-2px)}}
+      .phase-waves,.pool-waves{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}.phase-waves .phase{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;animation:phaseBreathe 3s ease-in-out infinite}.phase-waves .phase-2{animation-delay:-1.4s}.phase-waves .phase-3{animation-delay:-2.8s}.phase-waves line{stroke:var(--secondary-text-color);stroke-width:1;stroke-dasharray:3 3;opacity:.16;vector-effect:non-scaling-stroke}@keyframes phaseBreathe{50%{filter:brightness(1.24) saturate(1.15)}}.pool-waves{opacity:.2}.pool-waves path{fill:none;stroke:var(--accent);stroke-width:1.7;stroke-linecap:round;animation:linePulse 3s ease-in-out infinite}.pool-waves path+path{animation-delay:-1.4s;opacity:.65}@keyframes linePulse{50%{opacity:.35;transform:translateY(-2px)}}
       .price-bars{position:absolute;inset:10px 42px 8px 12px;display:flex;align-items:flex-end;gap:5px;opacity:.2;z-index:0}.price-bars i{display:block;width:3px;border-radius:9px 9px 0 0;background:var(--accent);animation:barPulse 2.8s ease-in-out infinite}@keyframes barPulse{50%{transform:scaleY(.72);opacity:.4}}
       .appliances{position:absolute;right:8px;top:4px;display:flex;gap:3px;z-index:3}.appliances img{width:24px;height:24px;object-fit:contain}.airflow{position:absolute;right:10px;top:8px;z-index:3;color:var(--accent)}.airflow i{display:block;border-top:2px solid currentColor;border-radius:50%;height:4px;margin:1px 0;animation:air 1.9s ease-in-out infinite}.airflow i:nth-child(1){width:11px}.airflow i:nth-child(2){width:17px;animation-delay:-.3s}.airflow i:nth-child(3){width:23px;animation-delay:-.6s}@keyframes air{50%{transform:translateX(-3px);opacity:.45}}
       @media(max-width:600px){.item{padding:9px 9px}.value{font-size:16px}.detail,.label{font-size:10px}.meter{gap:3px}.seg{width:12px}}
