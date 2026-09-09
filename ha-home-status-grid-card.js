@@ -1,4 +1,4 @@
-const VERSION = "0.1.3";
+const VERSION = "0.1.4";
 
 const PRESETS = {
   home_energy: {
@@ -59,8 +59,20 @@ const PRESETS = {
     color: "var(--state-on-icon, #20e3a2)",
     entity: "lock.hoveddoren",
     lock_entities: ["lock.bryggersdor", "lock.hoveddoren", "lock.garagedoren"],
+    terrace_lock_entity: "binary_sensor.terrassedor_las_contact",
+    gate_lock_entity: "binary_sensor.port_las_contact",
     open_count_entity: "sensor.open_windows",
     alarm_entity: "alarm_control_panel.verisure_alarm",
+    secondary_alarm_entity: "alarm_control_panel.dinsikring_dk",
+    door_entities: [
+      "binary_sensor.stue_terrassedor",
+      "binary_sensor.hoveddoren_contact",
+      "binary_sensor.bryggersdor_contact",
+      "binary_sensor.mads_terrassedor",
+      "binary_sensor.skur_contact",
+      "binary_sensor.garageport_contact",
+      "binary_sensor.garagedor_contact",
+    ],
     navigation_path: "/hjem-overblik/sikkerhed",
   },
   heating: {
@@ -71,6 +83,10 @@ const PRESETS = {
     heating_entity: "sensor.wavin_calefa_2_heating_state_ch",
     pressure_entity: "sensor.wavin_calefa_2_anlaegstryk",
     source_entity: "sensor.billigste_opvarmning_status",
+    daily_entity: "sensor.kamstrup_multical_energi_dag",
+    fallback_daily_entity: "sensor.fjernvarme_dagligt_forbrug",
+    water_regulator_entity: "sensor.wavin_calefa_2_dhw_regulator_state",
+    blocked_by_entity: "sensor.wavin_calefa_2_bvv_blokeret_af",
     navigation_path: "/energi-overblik/varme-center",
   },
   settings: {
@@ -212,34 +228,113 @@ class HaHomeStatusCard extends HTMLElement {
           ? "mdi:dog-side"
           : "mdi:dog";
     } else if (type === "security") {
-      const locks = cfg.lock_entities || [];
-      const locked = locks.filter(
+      const statuses = (cfg.lock_entities || []).map(
         (id) => this.state(id)?.state === "locked",
-      ).length;
+      );
+      statuses.push(
+        ["off", "closed", "false", "0"].includes(
+          this.text(cfg.terrace_lock_entity, "").toLowerCase(),
+        ),
+      );
+      statuses.push(
+        ["on", "open", "true", "1"].includes(
+          this.text(cfg.gate_lock_entity, "").toLowerCase(),
+        ),
+      );
+      const locked = statuses.filter(Boolean).length;
       const open = this.number(cfg.open_count_entity);
-      value =
-        locked === locks.length && (!Number.isFinite(open) || open === 0)
-          ? "Sikret"
-          : "Åben";
-      detail =
-        Number.isFinite(open) && open > 0
-          ? `${this.fmt(open, 0)} åbne`
-          : `${locked}/${locks.length} låst`;
+      value = locked === statuses.length ? "Låst" : "Åben";
+      detail = "";
       meter = locked;
       color =
-        value === "Sikret"
+        value === "Låst"
           ? "var(--state-on-icon, #20e3a2)"
           : "var(--warning-color, #f59e0b)";
-      cfg.icon = value === "Sikret" ? "mdi:home-lock" : "mdi:home-lock-open";
+      cfg.icon = value === "Låst" ? "mdi:home-lock" : "mdi:home-lock-open";
+      const alarmIcon = (id) => {
+        const state = this.text(id, "unknown");
+        if (state === "armed_away")
+          return ["mdi:shield-lock-outline", "var(--state-on-icon)"];
+        if (["armed_home", "armed_night"].includes(state))
+          return ["mdi:shield-home-outline", "var(--state-warn-icon)"];
+        if (state === "triggered")
+          return ["mdi:shield-alert-outline", "var(--state-off-icon)"];
+        if (state === "disarmed")
+          return ["mdi:shield-off-outline", "var(--state-alert-icon)"];
+        return ["mdi:shield-question-outline", "var(--dashboard-icon-muted)"];
+      };
+      const [vIcon, vColor] = alarmIcon(cfg.alarm_entity);
+      const [aIcon, aColor] = alarmIcon(cfg.secondary_alarm_entity);
+      const doors = (cfg.door_entities || []).filter((id) =>
+        this.on(id),
+      ).length;
+      const windows = Number.isFinite(open) ? open : 0;
+      label = `<span class="security-row"><span><img src="/local/billeder/security-status/verisure-brand-icon.png"><ha-icon icon="${vIcon}" style="color:${vColor}"></ha-icon></span><span><img src="/local/billeder/security-status/ajax-brand-icon.png"><ha-icon icon="${aIcon}" style="color:${aColor}"></ha-icon></span><span><ha-icon icon="${windows ? "mdi:window-open-variant" : "mdi:window-closed-variant"}"></ha-icon><b>${windows}</b></span><span><ha-icon icon="${doors ? "mdi:door-open" : "mdi:door-closed"}"></ha-icon><b>${doors}</b></span></span>`;
     } else if (type === "heating") {
       const heating = /opvarm|til|heat/.test(
         this.text(cfg.heating_entity, "").toLowerCase(),
       );
       value = heating ? "Varmer" : this.text(cfg.entity, "Klar");
       const pressure = this.number(cfg.pressure_entity);
-      detail = Number.isFinite(pressure)
-        ? `${this.fmt(pressure, 1)} bar · ${this.text(cfg.source_entity, "")}`
-        : this.text(cfg.source_entity, "Varmeanlæg");
+      const heatDayPrimary = this.number(cfg.daily_entity);
+      const heatDayFallback = this.number(cfg.fallback_daily_entity);
+      const heatDay = Number.isFinite(heatDayPrimary)
+        ? heatDayPrimary
+        : heatDayFallback;
+      detail = Number.isFinite(heatDay)
+        ? heatDay >= 100
+          ? `${this.fmt(heatDay / 1000, 1)} MWh`
+          : `${this.fmt(heatDay, 0)} kWh`
+        : Number.isFinite(pressure)
+          ? `${this.fmt(pressure, 1)} bar`
+          : "Afventer";
+      const cheapest = this.text(cfg.source_entity, "").toLowerCase();
+      let sourceIcon = "mdi:help-circle-outline";
+      let sourceText = "?";
+      let sourceColor = "var(--secondary-text-color)";
+      if (cheapest.includes("mix") || cheapest.includes("begge")) {
+        sourceIcon = "mdi:shuffle-variant";
+        sourceText = "Mix";
+        sourceColor = "var(--state-on-icon)";
+      } else if (
+        cheapest.includes("varmepumpe") ||
+        cheapest.includes("ac") ||
+        cheapest === "vp"
+      ) {
+        sourceIcon = "mdi:air-conditioner";
+        sourceText = "VP";
+        sourceColor = "var(--state-info-icon)";
+      } else if (cheapest.includes("fjernvarme") || cheapest === "fj") {
+        sourceIcon = "mdi:pipe-valve";
+        sourceText = "FJ";
+        sourceColor = "var(--warning-color)";
+      }
+      const waterState = this.text(cfg.entity, "").toLowerCase();
+      const regulator = this.text(cfg.water_regulator_entity, "").toLowerCase();
+      const blockedBy = this.text(cfg.blocked_by_entity, "").toLowerCase();
+      const bypass =
+        waterState.includes("bypass") || regulator.includes("bypass");
+      const water =
+        waterState.includes("opvarm") ||
+        waterState.includes("varmt") ||
+        regulator.includes("varm");
+      const blocked =
+        waterState.includes("blokeret") ||
+        (blockedBy &&
+          !["ingen", "0", "unknown", "unavailable"].includes(blockedBy));
+      const waterIcon = blocked
+        ? "mdi:water-off"
+        : bypass
+          ? "mdi:water-sync"
+          : water
+            ? "mdi:water"
+            : "mdi:water-outline";
+      const waterColor = blocked
+        ? "var(--warning-color)"
+        : bypass || water
+          ? "var(--state-info-icon)"
+          : "var(--dashboard-icon-muted)";
+      label = `<span class="source-row"><ha-icon icon="${sourceIcon}" style="color:${sourceColor}"></ha-icon><b>${sourceText}</b><ha-icon icon="${waterIcon}" style="color:${waterColor}"></ha-icon></span>`;
       meter = heating ? 4 : 1;
       color = heating
         ? "var(--error-color, #f43f5e)"
@@ -345,13 +440,13 @@ class HaHomeStatusCard extends HTMLElement {
       :host{display:block}
       .item{display:block;width:100%;min-width:0;max-width:100%;height:85px;box-sizing:border-box;position:relative;overflow:hidden;padding:10px 12px;border:0;border-left:3px solid color-mix(in srgb,var(--accent) 78%,transparent);border-radius:15px;background:var(--surface,var(--ha-card-background,var(--card-background-color,#172536)));box-shadow:var(--dashboard-shadow-strong,0 8px 22px rgba(0,0,0,.22));color:var(--gray800,var(--primary-text-color,#f8fafc));font:inherit;text-align:left;cursor:pointer}
       .value{position:relative;z-index:2;font-size:18px;font-weight:750;line-height:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:38px}.meter{position:relative;z-index:2;display:flex;gap:4px;height:8px;margin:5px 0}.seg{width:14px;height:6px;border-radius:99px;background:color-mix(in srgb,var(--dashboard-icon-muted,#64748b) 25%,transparent)}.seg.on{background:var(--accent);box-shadow:0 0 7px color-mix(in srgb,var(--accent) 28%,transparent)}
-      .detail{display:block;min-width:0;max-width:100%;position:relative;z-index:2;color:var(--gray600,var(--secondary-text-color,#a7b2c2));font-size:11px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:35px;box-sizing:border-box}.label{display:block;min-width:0;max-width:100%;position:relative;z-index:2;color:var(--gray700,var(--secondary-text-color,#cbd5e1));font-size:11px;font-weight:700;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:35px;box-sizing:border-box}
+      .detail{display:block;min-width:0;max-width:100%;position:relative;z-index:2;color:var(--gray600,var(--secondary-text-color,#a7b2c2));font-size:11px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:35px;box-sizing:border-box}.label{display:block;min-width:0;max-width:100%;position:relative;z-index:2;color:var(--gray700,var(--secondary-text-color,#cbd5e1));font-size:11px;font-weight:700;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:35px;box-sizing:border-box}.source-row{display:flex;align-items:center;gap:5px;height:14px}.source-row ha-icon{position:static;width:13px;height:13px;--mdc-icon-size:13px;flex:0 0 13px}.source-row b{line-height:1}.security-row{display:flex;align-items:center;gap:3px;height:17px}.security-row>span{display:flex;align-items:center;gap:1px;height:17px;padding:0 2px;border-radius:5px;background:color-mix(in srgb,var(--dashboard-icon-muted,#64748b) 9%,transparent)}.security-row img,.security-row ha-icon{position:static;width:12px;height:12px;--mdc-icon-size:12px;object-fit:contain}.security-row b{font-size:9px;line-height:1}
       .bg-icon{position:absolute;right:-10px;bottom:-10px;width:58px;height:58px;--mdc-icon-size:58px;color:var(--accent);opacity:.12;animation:drift 5s ease-in-out infinite;z-index:1;pointer-events:none;filter:saturate(1.05) drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 10%,transparent))}@keyframes drift{50%{transform:translate(-4px,-3px) scale(1.04) rotate(-4deg);opacity:.22}}
       .flow-lines,.pool-waves{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.2;pointer-events:none}.flow-lines path,.pool-waves path{fill:none;stroke:var(--accent);stroke-width:1.7;stroke-linecap:round;animation:linePulse 3s ease-in-out infinite}.flow-lines path+path,.pool-waves path+path{animation-delay:-1.4s;opacity:.65}@keyframes linePulse{50%{opacity:.35;transform:translateY(-2px)}}
       .price-bars{position:absolute;inset:10px 42px 8px 12px;display:flex;align-items:flex-end;gap:5px;opacity:.2;z-index:0}.price-bars i{display:block;width:3px;border-radius:9px 9px 0 0;background:var(--accent);animation:barPulse 2.8s ease-in-out infinite}@keyframes barPulse{50%{transform:scaleY(.72);opacity:.4}}
       .appliances{position:absolute;right:8px;top:4px;display:flex;gap:3px;z-index:3}.appliances img{width:24px;height:24px;object-fit:contain}.airflow{position:absolute;right:10px;top:8px;z-index:3;color:var(--accent)}.airflow i{display:block;border-top:2px solid currentColor;border-radius:50%;height:4px;margin:1px 0;animation:air 1.9s ease-in-out infinite}.airflow i:nth-child(1){width:11px}.airflow i:nth-child(2){width:17px;animation-delay:-.3s}.airflow i:nth-child(3){width:23px;animation-delay:-.6s}@keyframes air{50%{transform:translateX(-3px);opacity:.45}}
       @media(max-width:600px){.item{padding:9px 9px}.value{font-size:16px}.detail,.label{font-size:10px}.meter{gap:3px}.seg{width:12px}}
-    </style><button class="item" style="--accent:${item.color}" aria-label="${item.label}">${this.decoration(item)}<div class="value">${item.value}</div><div class="meter">${[1, 2, 3, 4, 5].map((n) => `<i class="seg ${n <= item.meter ? "on" : ""}"></i>`).join("")}</div><div class="detail">${item.detail || "&nbsp;"}</div><div class="label">${item.label}</div><ha-icon class="bg-icon" icon="${item.icon || "mdi:information-outline"}"></ha-icon></button>`;
+    </style><button class="item" style="--accent:${item.color}" aria-label="${item.name || item.type}">${this.decoration(item)}<div class="value">${item.value}</div><div class="meter">${[1, 2, 3, 4, 5].map((n) => `<i class="seg ${n <= item.meter ? "on" : ""}"></i>`).join("")}</div><div class="detail">${item.detail || "&nbsp;"}</div><div class="label">${item.label}</div><ha-icon class="bg-icon" icon="${item.icon || "mdi:information-outline"}"></ha-icon></button>`;
     this.shadowRoot
       .querySelector(".item")
       .addEventListener("click", () => this.action(item));
