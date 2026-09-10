@@ -1,4 +1,4 @@
-const VERSION = "0.4.4";
+const VERSION = "0.4.5";
 
 const PRESETS = {
   home_energy: {
@@ -74,6 +74,7 @@ const PRESETS = {
     lock_entities: ["lock.bryggersdor", "lock.hoveddoren", "lock.garagedoren"],
     terrace_lock_entity: "binary_sensor.terrassedor_las_contact",
     gate_lock_entity: "binary_sensor.port_las_contact",
+    gate_lock_inverted: true,
     open_count_entity: "sensor.open_windows",
     alarm_entity: "alarm_control_panel.verisure_alarm",
     secondary_alarm_entity: "alarm_control_panel.dinsikring_dk",
@@ -302,15 +303,16 @@ class HaHomeStatusCard extends HTMLElement {
         if (s === undefined || ERROR_RAW.includes(s)) return "error";
         return s === "locked" ? "locked" : "unlocked";
       };
-      const boolSegState = (id, lockedValues) => {
+      const boolSegState = (id, inverted = false) => {
         const raw = this.text(id, "");
         const low = raw.toLowerCase();
         if (!raw || ["unavailable", "unknown"].includes(low)) return "error";
-        return lockedValues.includes(low) ? "locked" : "unlocked";
+        const active = ["on", "open", "true", "1"].includes(low);
+        return active === inverted ? "locked" : "unlocked";
       };
       const segStates = (cfg.lock_entities || []).map((id) => lockSegState(id));
-      segStates.push(boolSegState(cfg.terrace_lock_entity, ["off", "closed", "false", "0"]));
-      segStates.push(boolSegState(cfg.gate_lock_entity, ["on", "open", "true", "1"]));
+      segStates.push(boolSegState(cfg.terrace_lock_entity, !!cfg.terrace_lock_inverted));
+      segStates.push(boolSegState(cfg.gate_lock_entity, !!cfg.gate_lock_inverted));
       const locked = segStates.filter((s) => s === "locked").length;
       const hasError = segStates.includes("error");
       const open = this.number(cfg.open_count_entity);
@@ -622,13 +624,25 @@ class HaHomeStatusCardEditor extends HTMLElement {
           `<option value="${key}" ${this.config?.preset === key ? "selected" : ""}>${PRESETS[key].name}</option>`,
       )
       .join("");
-    this.innerHTML = `<style>select{box-sizing:border-box;width:100%;padding:10px}label{display:block;margin:8px 0 4px}</style><label>Kortfunktion</label><select>${options}</select>`;
+    const inversion = this.config?.preset === "security"
+      ? `<label class="check"><input id="gate-lock-inverted" type="checkbox" ${this.config.gate_lock_inverted !== false ? "checked" : ""}>Portkontakt er omvendt (åben = låst)</label>`
+      : "";
+    this.innerHTML = `<style>select{box-sizing:border-box;width:100%;padding:10px}label{display:block;margin:8px 0 4px}.check{display:flex;align-items:center;gap:8px}.check input{width:18px;height:18px}</style><label>Kortfunktion</label><select>${options}</select>${inversion}`;
     this.querySelector("select").addEventListener("change", (event) =>
       this.dispatchEvent(
         new CustomEvent("config-changed", {
           bubbles: true,
           composed: true,
           detail: { config: { ...this.config, preset: event.target.value } },
+        }),
+      ),
+    );
+    this.querySelector("#gate-lock-inverted")?.addEventListener("change", (event) =>
+      this.dispatchEvent(
+        new CustomEvent("config-changed", {
+          bubbles: true,
+          composed: true,
+          detail: { config: { ...this.config, gate_lock_inverted: event.target.checked } },
         }),
       ),
     );
