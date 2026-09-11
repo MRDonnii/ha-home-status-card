@@ -25,6 +25,11 @@ Rumfliserne reserverer mindst 160 px pr. flise og bruger en separat fuldbredde
 til rumnavnet. Lange navne som Soveværelse og Badeværelse afkortes derfor ikke
 af temperaturfeltet.
 
+Layoutkortet måler selv sin placering og browserens aktuelle højde. Med
+`bottom_gap` reserveres den ønskede afstand over navbaren (110 px som
+standard), og højden genberegnes ved enhver ændring af vinduesstørrelsen.
+Naturligt indhold kan stadig gøre layoutet højere.
+
 Bilfunktionen viser `Planlagt`, når Monta melder en aktiv ladeplan via
 `schedule_entity` eller `charger_state_entity`. Ved aktiv opladning vises den
 aktuelle ladeeffekt i stedet. Entiteterne kan overskrives på kortet til andre

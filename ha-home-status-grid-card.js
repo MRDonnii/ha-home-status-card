@@ -1,4 +1,4 @@
-const VERSION = "0.8.1";
+const VERSION = "0.8.2";
 
 const PRESETS = {
   home_energy: {
@@ -855,7 +855,9 @@ class HaHomeSummaryCardEditor extends HTMLElement {
 }
 
 class HaHomeDesktopLayoutCard extends HTMLElement {
-  constructor(){super();this.attachShadow({mode:"open"});this._children=[];}
+  constructor(){super();this.attachShadow({mode:"open"});this._children=[];this._resize=()=>requestAnimationFrame(()=>this._fitViewport());}
+  connectedCallback(){window.addEventListener("resize",this._resize);this._resize();}
+  disconnectedCallback(){window.removeEventListener("resize",this._resize);}
   setConfig(config){
     if(!Array.isArray(config.left_cards)||!Array.isArray(config.right_cards)) throw new Error("Angiv left_cards og right_cards");
     this.config=structuredClone(config);this._build();
@@ -864,21 +866,22 @@ class HaHomeDesktopLayoutCard extends HTMLElement {
   async _build(){
     const token={};this._buildToken=token;
     const helpers=await window.loadCardHelpers();if(this._buildToken!==token)return;
-    this.shadowRoot.innerHTML=`<style>:host{display:block}.layout{display:grid;grid-template-columns:var(--desktop-columns,minmax(0,.9fr) minmax(440px,1.1fr));align-items:stretch;gap:var(--desktop-gap,clamp(10px,.75vw,18px))}.column{display:flex;flex-direction:column;min-width:0;gap:var(--desktop-gap,clamp(10px,.75vw,18px))}.slot{min-width:0}.slot.grow{display:flex;flex:1;min-height:0}.slot.grow>*{flex:1;min-width:0;min-height:0}@media(max-width:1399px){.layout{grid-template-columns:minmax(0,1fr) minmax(420px,1fr)}} </style><div class="layout"><div class="column left"></div><div class="column right"></div></div>`;
+    this.shadowRoot.innerHTML=`<style>:host{display:block}.layout{display:grid;grid-template-columns:var(--desktop-columns,minmax(0,.9fr) minmax(440px,1.1fr));align-items:stretch;min-height:var(--desktop-min-height,auto);gap:var(--desktop-gap,clamp(10px,.75vw,18px))}.column{display:flex;flex-direction:column;min-width:0;gap:var(--desktop-gap,clamp(10px,.75vw,18px))}.slot{min-width:0}.slot.grow{display:flex;flex:1;min-height:0}.slot.grow>*{flex:1;min-width:0;min-height:0}@media(max-width:1399px){.layout{grid-template-columns:minmax(0,1fr) minmax(420px,1fr)}} </style><div class="layout"><div class="column left"></div><div class="column right"></div></div>`;
     const make=(cfg,parent,index,total)=>{const card=helpers.createCardElement(cfg);const slot=document.createElement("div");slot.className=`slot${index===total-1?" grow":""}`;slot.append(card);parent.append(slot);this._children.push(card);if(this._hass)card.hass=this._hass;};
     this._children=[];const left=this.shadowRoot.querySelector(".left"),right=this.shadowRoot.querySelector(".right");
     this.config.left_cards.forEach((cfg,i)=>make(cfg,left,i,this.config.left_cards.length));
     this.config.right_cards.forEach((cfg,i)=>make(cfg,right,i,this.config.right_cards.length));
-    const layout=this.shadowRoot.querySelector(".layout");layout.style.setProperty("--desktop-columns",this.config.columns||"minmax(0,.9fr) minmax(440px,1.1fr)");layout.style.setProperty("--desktop-gap",this.config.gap||"clamp(10px,.75vw,18px)");
+    const layout=this.shadowRoot.querySelector(".layout");layout.style.setProperty("--desktop-columns",this.config.columns||"minmax(0,.9fr) minmax(440px,1.1fr)");layout.style.setProperty("--desktop-gap",this.config.gap||"clamp(10px,.75vw,18px)");this._fitViewport();
   }
+  _fitViewport(){const layout=this.shadowRoot?.querySelector(".layout");if(!layout||!window.matchMedia("(min-width:1101px)").matches)return;const top=this.getBoundingClientRect().top;const bottomGap=Math.max(90,Number(this.config?.bottom_gap)||110);layout.style.minHeight=`${Math.max(0,window.innerHeight-top-bottomGap)}px`;}
   getCardSize(){return 12;}
   static getConfigElement(){return document.createElement("ha-home-desktop-layout-card-editor");}
-  static getStubConfig(){return{columns:"minmax(0,.9fr) minmax(440px,1.1fr)",gap:"clamp(10px,.75vw,18px)",left_cards:[],right_cards:[]};}
+  static getStubConfig(){return{columns:"minmax(0,.9fr) minmax(440px,1.1fr)",gap:"clamp(10px,.75vw,18px)",bottom_gap:110,left_cards:[],right_cards:[]};}
 }
 class HaHomeDesktopLayoutCardEditor extends HTMLElement {
   setConfig(config){this.config=structuredClone(config);this.render();}
   set hass(hass){this._hass=hass;}
-  render(){this.innerHTML=`<style>label{display:block;margin:10px 0 4px;font-weight:600}input{box-sizing:border-box;width:100%;padding:10px}</style><label>PC-kolonner</label><input data-key="columns" value="${this.config.columns||''}"><label>Responsiv afstand</label><input data-key="gap" value="${this.config.gap||''}">`;this.querySelectorAll("input").forEach((input)=>input.addEventListener("change",()=>this.dispatchEvent(new CustomEvent("config-changed",{bubbles:true,composed:true,detail:{config:{...this.config,[input.dataset.key]:input.value}}}))));}
+  render(){this.innerHTML=`<style>label{display:block;margin:10px 0 4px;font-weight:600}input{box-sizing:border-box;width:100%;padding:10px}</style><label>PC-kolonner</label><input data-key="columns" value="${this.config.columns||''}"><label>Responsiv afstand</label><input data-key="gap" value="${this.config.gap||''}"><label>Afstand over navbar (px)</label><input data-key="bottom_gap" type="number" min="90" max="180" value="${this.config.bottom_gap||110}">`;this.querySelectorAll("input").forEach((input)=>input.addEventListener("change",()=>this.dispatchEvent(new CustomEvent("config-changed",{bubbles:true,composed:true,detail:{config:{...this.config,[input.dataset.key]:input.type==='number'?Number(input.value):input.value}}}))));}
 }
 if (!customElements.get("ha-home-summary-card")) customElements.define("ha-home-summary-card",HaHomeSummaryCard);
 if (!customElements.get("ha-home-summary-card-editor")) customElements.define("ha-home-summary-card-editor",HaHomeSummaryCardEditor);

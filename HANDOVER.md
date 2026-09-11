@@ -1,5 +1,12 @@
 # Handover
 
+- Version 0.8.2 lader PC-layoutet måle sin faktiske topplacering og browserens
+  `innerHeight`. Det beregner automatisk den ledige højde ned mod navbaren og
+  reserverer `bottom_gap` (110 px på forsiden). Beregningen køres igen ved
+  enhver resize og findes kun i desktopkortet.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.2`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-desktop-navbar-fit-20260911-172500`.
+
 - Version 0.8.1 gør rumfliserne mindst 160 px brede og reserverer hele den
   øverste tekstlinje til rumnavnet. Temperatur og setpunkt ligger sammen på
   nederste linje, så Spisestue, Soveværelse, Badeværelse, Bryggers og Lille WC
