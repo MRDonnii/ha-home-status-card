@@ -9,6 +9,13 @@ preset: home_energy
 
 Indbyggede funktioner: `home_energy`, `ev`, `electricity_price`, `pool`, `pet`, `security`, `heating`, `settings` og generisk `entity`. Alle standardværdier kan overskrives på det enkelte kort.
 
+Pakken indeholder også `custom:ha-home-summary-card`, der supplerer forsiden med månedens elforbrug, vandforbrug og vandpris, dagens fjernvarme, indendørs CO₂/luftkvalitet, Protect-drift og de næste syv dages kalenderhændelser i ét responsivt kort. Det undgår at gentage forsidens eksisterende effekt-, pris-, person- og sikkerhedskort.
+
+```yaml
+type: custom:ha-home-summary-card
+title: Husstatus
+```
+
 Bilfunktionen viser `Planlagt`, når Monta melder en aktiv ladeplan via
 `schedule_entity` eller `charger_state_entity`. Ved aktiv opladning vises den
 aktuelle ladeeffekt i stedet. Entiteterne kan overskrives på kortet til andre

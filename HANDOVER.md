@@ -1,5 +1,17 @@
 # Handover
 
+- Version 0.5.0 tilføjer `custom:ha-home-summary-card`, som kun bruges under
+  de bevægelsesstyrede kameraer på PC-forsiden. Kortet viser supplerende data,
+  der ikke allerede findes i forsidens højrekolonne: månedens el, dagens vand
+  og fjernvarme, vandpris/flow, CO2/luftkvalitet, Protect-drift og kommende
+  kalenderhændelser.
+- Kortet opretter sin faste DOM én gang, opdaterer eksisterende felter ved
+  relevante entity-skift og genopbygger kun hændelseslisten, når selve
+  kalenderresultatet ændres. Kalenderen hentes højst hvert femte minut.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.5.0`.
+- Dashboard-backup før installation:
+  `/mnt/ha-config/_archive/backups/lovelace/home-summary-card-20260911-181500`.
+
 - Version 0.4.7: Bilkortet følger igen Monta-ladeplanen via
   `sensor.monta_th_bil_lader_last_charge` og
   `sensor.monta_th_bil_lader_state`. Når bilen ikke lader og en af sensorerne

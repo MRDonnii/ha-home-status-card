@@ -1,4 +1,4 @@
-const VERSION = "0.4.7";
+const VERSION = "0.5.0";
 
 const PRESETS = {
   home_energy: {
@@ -681,6 +681,141 @@ if (!customElements.get("ha-home-status-card"))
   customElements.define("ha-home-status-card", HaHomeStatusCard);
 if (!customElements.get("ha-home-status-card-editor"))
   customElements.define("ha-home-status-card-editor", HaHomeStatusCardEditor);
+
+const SUMMARY_DEFAULTS = {
+  title: "Husets overblik",
+  monthly_energy_entity: "sensor.manedlig_stromforbrug",
+  water_today_entity: "sensor.vandmaler_dagens_forbrug",
+  water_month_cost_entity: "sensor.vandmaler_manedens_pris",
+  heat_today_entity: "sensor.kamstrup_multical_energi_dag",
+  co2_entity: "sensor.luftkvalitet_spisestuen_carbon_dioxide",
+  air_quality_entity: "sensor.luftkvalitet_spisestuen_air_quality",
+  water_flow_entity: "sensor.vandmaler_flow",
+  storage_entity: "sensor.jt_net_protect_storage_utilization",
+  hdd_entities: ["binary_sensor.jt_net_protect_hdd_1", "binary_sensor.jt_net_protect_hdd_2"],
+  calendars: [
+    { entity: "calendar.th_faelles", name: "Fælles", color: "var(--orange, #fb923c)" },
+    { entity: "calendar.mads", name: "Mads", color: "var(--yellow, #facc15)" },
+    { entity: "calendar.mads_viggo", name: "Viggo", color: "var(--green, #22c55e)" },
+    { entity: "calendar.mette_arbejde", name: "Mette", color: "var(--dashboard-accent, #38bdf8)" },
+    { entity: "calendar.bordtennis", name: "Bordtennis", color: "var(--purple, #a855f7)" },
+  ],
+};
+
+class HaHomeSummaryCard extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._sig = "";
+    this._events = [];
+    this._eventsSig = "";
+  }
+  setConfig(config) {
+    this.config = { ...SUMMARY_DEFAULTS, ...config };
+    this._sig = "";
+    this._rendered = false;
+    this._render();
+  }
+  set hass(hass) {
+    this._hass = hass;
+    const ids = [this.config?.monthly_energy_entity, this.config?.water_today_entity,
+      this.config?.water_month_cost_entity, this.config?.heat_today_entity,
+      this.config?.co2_entity, this.config?.air_quality_entity, this.config?.water_flow_entity,
+      this.config?.storage_entity, ...(this.config?.hdd_entities || []),
+      ...(this.config?.calendars || []).map((x) => x.entity)].filter(Boolean);
+    const sig = JSON.stringify(ids.map((id) => [id, hass.states?.[id]?.state,
+      hass.states?.[id]?.last_changed, hass.states?.[id]?.attributes?.message,
+      hass.states?.[id]?.attributes?.start_time]));
+    if (sig !== this._sig) {
+      this._sig = sig;
+      this._render();
+      this._loadEvents();
+    }
+  }
+  _state(id) { return id ? this._hass?.states?.[id] : undefined; }
+  _num(id) { return Number(String(this._state(id)?.state ?? "").replace(",", ".")); }
+  _fmt(value, digits = 1) { return Number.isFinite(value) ? value.toLocaleString("da-DK", { maximumFractionDigits: digits }) : "—"; }
+  _esc(value) { return String(value ?? "").replace(/[&<>"']/g, (m) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[m]); }
+  _label(value) { return String(value || "—").replaceAll("_", " ").replace(/\b\w/g, (x) => x.toUpperCase()); }
+  async _loadEvents() {
+    if (!this._hass?.callWS || this._loadingEvents) return;
+    const calendars = this.config.calendars || [];
+    const key = JSON.stringify(calendars.map((x) => x.entity));
+    if (key === this._eventsKey && Date.now() - (this._eventsAt || 0) < 300000) return;
+    this._loadingEvents = true;
+    try {
+      const start = new Date(); const end = new Date(start.getTime() + 7 * 86400000);
+      const data = await this._hass.callWS({ type: "calendar/get_events", start_time: start.toISOString(), end_time: end.toISOString(), entity_ids: calendars.map((x) => x.entity) });
+      const events = [];
+      calendars.forEach((cal) => (data?.[cal.entity]?.events || []).forEach((event) => events.push({ ...event, calendar: cal })));
+      this._events = events.sort((a,b) => new Date(a.start?.dateTime || a.start?.date) - new Date(b.start?.dateTime || b.start?.date)).slice(0, 6);
+      this._eventsKey = key; this._eventsAt = Date.now(); this._renderEvents();
+    } catch (_) { this._events = this._fallbackEvents(); this._renderEvents(); }
+    finally { this._loadingEvents = false; }
+  }
+  _fallbackEvents() {
+    return (this.config.calendars || []).map((calendar) => {
+      const a = this._state(calendar.entity)?.attributes || {};
+      return a.message && a.start_time ? { summary: a.message, start: { dateTime: a.start_time }, calendar } : null;
+    }).filter(Boolean).sort((a,b) => new Date(a.start.dateTime) - new Date(b.start.dateTime)).slice(0,6);
+  }
+  _eventTime(event) {
+    const raw = event.start?.dateTime || event.start?.date;
+    if (!raw) return "";
+    const date = new Date(raw); const allDay = Boolean(event.start?.date && !event.start?.dateTime);
+    const day = date.toLocaleDateString("da-DK", { weekday: "short", day: "numeric", month: "short" });
+    return allDay ? day : `${day} · ${date.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })}`;
+  }
+  _renderEvents() {
+    const host = this.shadowRoot?.querySelector(".events"); if (!host) return;
+    const events = this._events.length ? this._events : this._fallbackEvents();
+    const sig = JSON.stringify(events.map((e) => [e.summary, e.start, e.calendar?.entity]));
+    if (sig === this._eventsSig) return; this._eventsSig = sig;
+    host.innerHTML = events.length ? events.map((event) => `<div class="event" style="--event:${this._esc(event.calendar?.color || 'var(--dashboard-accent,#38bdf8)')}"><i></i><div><b>${this._esc(event.summary || "Aftale")}</b><span>${this._esc(this._eventTime(event))} · ${this._esc(event.calendar?.name || "Kalender")}</span></div></div>`).join("") : `<div class="empty">Ingen aftaler de næste 7 dage</div>`;
+  }
+  _render() {
+    if (!this.config) return;
+    if (!this._rendered) {
+      this.shadowRoot.innerHTML = `<style>
+        :host{display:block}.card{position:relative;overflow:hidden;padding:18px;border-radius:22px;background:linear-gradient(145deg,color-mix(in srgb,var(--white,#fff) 5%,transparent),transparent 42%),var(--ha-card-background,var(--surface,#15191f));border:1px solid color-mix(in srgb,var(--dashboard-accent,#38bdf8) 32%,transparent);box-shadow:0 12px 28px color-mix(in srgb,var(--black,#000) 22%,transparent);color:var(--primary-text-color,#fff)}
+        header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}h2{font-size:20px;margin:0;display:flex;align-items:center;gap:9px}h2 ha-icon{color:var(--dashboard-accent,#38bdf8)}.health{font-size:12px;font-weight:800;padding:6px 10px;border-radius:99px;background:color-mix(in srgb,var(--success-color,#20e3a2) 14%,transparent);color:var(--success-color,#20e3a2)}
+        .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:14px}.metric{min-width:0;padding:11px 12px;border-radius:15px;background:color-mix(in srgb,var(--primary-text-color,#fff) 5%,transparent);border:1px solid color-mix(in srgb,var(--primary-text-color,#fff) 9%,transparent)}.metric span{display:block;color:var(--secondary-text-color,#a7b2c2);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.metric b{display:block;font-size:19px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.metric small{font-size:10px;color:var(--secondary-text-color,#a7b2c2)}
+        .body{display:grid;grid-template-columns:minmax(180px,.82fr) minmax(0,1.18fr);gap:12px}.panel{padding:13px;border-radius:16px;background:color-mix(in srgb,var(--black,#000) 13%,transparent);border:1px solid color-mix(in srgb,var(--primary-text-color,#fff) 8%,transparent)}.panel h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px;color:var(--secondary-text-color,#a7b2c2)}
+        .status{display:grid;gap:8px}.row{display:flex;align-items:center;gap:8px;font-size:12px}.row ha-icon{width:17px;height:17px;--mdc-icon-size:17px;color:var(--dashboard-accent,#38bdf8)}.row b{margin-left:auto}.events{display:grid;gap:7px}.event{display:grid;grid-template-columns:4px 1fr;gap:9px;min-width:0}.event>i{display:block;border-radius:5px;background:var(--event)}.event b,.event span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event b{font-size:12px}.event span,.empty{font-size:10px;color:var(--secondary-text-color,#a7b2c2);margin-top:2px}
+        @media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr)}.body{grid-template-columns:1fr}.card{padding:14px}}
+      </style><ha-card class="card"><header><h2><ha-icon icon="mdi:home-analytics"></ha-icon><span class="title"></span></h2><span class="health"></span></header><div class="metrics"><div class="metric monthly"></div><div class="metric water"></div><div class="metric heat"></div><div class="metric co2"></div></div><div class="body"><section class="panel"><h3>Teknik og ressourcer</h3><div class="status"></div></section><section class="panel"><h3>Kommende hændelser</h3><div class="events"></div></section></div></ha-card>`;
+      this._rendered = true;
+    }
+    if (!this._hass) return;
+    const c=this.config, monthly=this._num(c.monthly_energy_entity), water=this._num(c.water_today_entity);
+    const waterCost=this._num(c.water_month_cost_entity), heat=this._num(c.heat_today_entity);
+    const co2=this._num(c.co2_entity), air=this._state(c.air_quality_entity)?.state || "unknown";
+    const flow=this._num(c.water_flow_entity), storage=this._num(c.storage_entity);
+    const diskProblem=(c.hdd_entities||[]).some((id)=>this._state(id)?.state==="on");
+    const healthy=!diskProblem && (!Number.isFinite(co2)||co2<1000);
+    this.shadowRoot.querySelector(".title").textContent=c.title;
+    const health=this.shadowRoot.querySelector(".health"); health.textContent=healthy?"Alt ser normalt ud":"Kræver opmærksomhed"; health.style.color=healthy?"var(--success-color,#20e3a2)":"var(--warning-color,#fb923c)";
+    const metric=(sel,label,value,unit)=>this.shadowRoot.querySelector(sel).innerHTML=`<span>${label}</span><b>${value}</b><small>${unit}</small>`;
+    metric(".monthly","El denne måned",this._fmt(monthly,0),"kWh"); metric(".water","Vand i dag",this._fmt(water,3),"m³"); metric(".heat","Fjernvarme i dag",this._fmt(heat,1),"kWh"); metric(".co2","CO₂ i huset",this._fmt(co2,0),"ppm");
+    this.shadowRoot.querySelector(".status").innerHTML=`<div class="row"><ha-icon icon="mdi:air-filter"></ha-icon><span>Luftkvalitet</span><b>${this._esc(this._label(air))}</b></div><div class="row"><ha-icon icon="mdi:water-pump"></ha-icon><span>Vandflow nu</span><b>${this._fmt(flow,0)} L/t</b></div><div class="row"><ha-icon icon="mdi:cash-multiple"></ha-icon><span>Vand denne måned</span><b>${this._fmt(waterCost,0)} kr</b></div><div class="row"><ha-icon icon="mdi:harddisk"></ha-icon><span>Protect lager</span><b>${this._fmt(storage,1)} %</b></div><div class="row"><ha-icon icon="mdi:server-security"></ha-icon><span>Harddiske</span><b>${diskProblem?"Fejl":"OK"}</b></div>`;
+    this._renderEvents();
+  }
+  getCardSize(){return 6;}
+  static getConfigElement(){return document.createElement("ha-home-summary-card-editor");}
+  static getStubConfig(){return {title:"Husets overblik"};}
+}
+
+class HaHomeSummaryCardEditor extends HTMLElement {
+  setConfig(config){this.config=structuredClone(config);this.render();}
+  set hass(hass){this._hass=hass;}
+  render(){
+    const fields=[["title","Titel"],["monthly_energy_entity","Elforbrug denne måned"],["water_today_entity","Vandforbrug i dag"],["water_month_cost_entity","Vandpris denne måned"],["heat_today_entity","Fjernvarme i dag"],["co2_entity","CO₂"],["air_quality_entity","Luftkvalitet"],["water_flow_entity","Vandflow"],["storage_entity","Protect lager"]];
+    this.innerHTML=`<style>label{display:block;margin:10px 0 4px;font-weight:600}input{box-sizing:border-box;width:100%;padding:10px;border:1px solid var(--divider-color);border-radius:8px;background:transparent;color:inherit}</style>${fields.map(([key,label])=>`<label>${label}</label><input data-key="${key}" value="${this.config?.[key]||SUMMARY_DEFAULTS[key]||''}">`).join('')}`;
+    this.querySelectorAll("input").forEach((input)=>input.addEventListener("change",()=>this.dispatchEvent(new CustomEvent("config-changed",{bubbles:true,composed:true,detail:{config:{...this.config,[input.dataset.key]:input.value}}}))));
+  }
+}
+if (!customElements.get("ha-home-summary-card")) customElements.define("ha-home-summary-card",HaHomeSummaryCard);
+if (!customElements.get("ha-home-summary-card-editor")) customElements.define("ha-home-summary-card-editor",HaHomeSummaryCardEditor);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-home-status-card",
@@ -688,6 +823,7 @@ window.customCards.push({
   description: "Knapkort med valgfri specialfunktion",
   preview: true,
 });
+window.customCards.push({ type:"ha-home-summary-card", name:"HA Home Summary Card", description:"Samlet husstatus, forbrug, kalender og kameraoverblik", preview:true });
 console.info(
   `%c HA-HOME-STATUS-GRID-CARD %c ${VERSION} `,
   "color:#fff;background:#38bdf8;font-weight:700",

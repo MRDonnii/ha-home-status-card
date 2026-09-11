@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><title>Home summary DOM smoke test</title>
+<script>
+customElements.define("ha-card",class extends HTMLElement{}); customElements.define("ha-icon",class extends HTMLElement{});
+window.loadCardHelpers=async()=>({});
+</script>
+<script src="../ha-home-status-grid-card.js"></script>
+<script>
+const card=document.createElement("ha-home-summary-card"); card.setConfig({title:"Husstatus"});
+card.hass={states:{"sensor.manedlig_stromforbrug":{state:"399.4"},"sensor.vandmaler_dagens_forbrug":{state:"0.053"},"sensor.vandmaler_manedens_pris":{state:"359"},"sensor.kamstrup_multical_energi_dag":{state:"28"},"sensor.luftkvalitet_spisestuen_carbon_dioxide":{state:"700"},"sensor.luftkvalitet_spisestuen_air_quality":{state:"good"},"sensor.vandmaler_flow":{state:"257"}},callWS:async()=>({})};
+document.body.append(card); if(!card.shadowRoot.querySelector(".metrics")||card.shadowRoot.querySelector(".monthly b").textContent!=="399") throw Error("summary render failed");
+</script>
