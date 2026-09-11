@@ -1,5 +1,11 @@
 # Handover
 
+- Version 0.8.10 matcher de store højre ikoners dæmpning og bevægelse med
+  dashboardets eksisterende statuskort: opacity 0,12, fem sekunders rolig drift
+  og opacity 0,22 ved animationens toppunkt. Reduceret bevægelse respekteres.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.10`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-summary-icon-animation-20260911-180000`.
+
 - Version 0.8.9 fjerner det lille venstre ikon fra temperaturfliserne, så
   navn, setpunkt og fugtighed starter direkte ved venstre indholdskant. Det
   store afdæmpede ikon nederst til højre bevares. Teksten `Intet setpunkt` er

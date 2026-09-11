@@ -20,6 +20,7 @@ if(utilityStyle.borderTopWidth!=="0px"||utilityStyle.borderLeftWidth!=="3px") th
 if(!electricity.querySelector(".utility-bg")||getComputedStyle(electricity.querySelector(".utility-bg")).position!=="absolute") throw Error("utility background icon failed");
 if(!root.querySelector(".room.unavailable")) throw Error("missing room status failed");
 if(!stue.querySelector(".room-bg")||getComputedStyle(stue.querySelector(".room-bg")).position!=="absolute") throw Error("room background icon failed");
+if(getComputedStyle(stue.querySelector(".room-bg")).animationName!=="summaryIconDrift") throw Error("room background animation failed");
 if(getComputedStyle(stue).backgroundImage!=="none") throw Error("room background must stay neutral");
 if(!stue.querySelector(".room-humidity")||!stue.textContent.includes("56%")) throw Error("room humidity failed");
 if(stue.querySelector(".room-icon")||root.querySelector(".rooms").textContent.includes("Intet setpunkt")) throw Error("obsolete room icon or setpoint placeholder found");
