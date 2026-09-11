@@ -1,5 +1,12 @@
 # Handover
 
+- Version 0.8.11 fjerner den visuelle yder-container omkring `Husets
+  overblik`: ingen baggrund, skygge, radius, kant eller indvendig padding.
+  Overskrift og underkort ligger nu frit i kolonnen, mens de enkelte fliser og
+  paneler beholder egne overflader og statusaccenter.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.11`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-summary-open-layout-20260911-181000`.
+
 - Version 0.8.10 matcher de store højre ikoners dæmpning og bevægelse med
   dashboardets eksisterende statuskort: opacity 0,12, fem sekunders rolig drift
   og opacity 0,22 ved animationens toppunkt. Reduceret bevægelse respekteres.

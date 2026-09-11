@@ -15,7 +15,7 @@ if(shell.style.getPropertyValue("--summary-status")!=="var(--success-color,#20e3
 if(electricity.style.getPropertyValue("--accent")!=="var(--success-color,#20e3a2)") throw Error("utility status accent failed");
 if(stue.classList.contains("warm")||stue.classList.contains("cold")||stue.classList.contains("unavailable")) throw Error("normal room status failed");
 const shellStyle=getComputedStyle(shell), utilityStyle=getComputedStyle(electricity);
-if(shellStyle.borderTopWidth!=="0px"||shellStyle.borderLeftWidth!=="3px") throw Error("house border style failed");
+if(shellStyle.borderTopWidth!=="0px"||shellStyle.borderLeftWidth!=="0px"||shellStyle.backgroundColor!=="rgba(0, 0, 0, 0)"||shellStyle.boxShadow!=="none") throw Error("house container must be visually open");
 if(utilityStyle.borderTopWidth!=="0px"||utilityStyle.borderLeftWidth!=="3px") throw Error("utility border style failed");
 if(!electricity.querySelector(".utility-bg")||getComputedStyle(electricity.querySelector(".utility-bg")).position!=="absolute") throw Error("utility background icon failed");
 if(!root.querySelector(".room.unavailable")) throw Error("missing room status failed");
