@@ -4,8 +4,19 @@ customElements.define("ha-card",class extends HTMLElement{}); customElements.def
 window.loadCardHelpers=async()=>({});
 </script>
 <script src="../ha-home-status-grid-card.js"></script>
+<body></body>
 <script>
 const card=document.createElement("ha-home-summary-card"); card.setConfig({title:"Husstatus"});
 card.hass={states:{"sensor.manedlig_stromforbrug":{state:"399.4"},"sensor.stromligning_current_price_vat":{state:"2.01"},"sensor.vandmaler_manedens_forbrug":{state:"4.635"},"sensor.vandmaler_manedens_pris":{state:"359"},"sensor.kamstrup_multical_energi_maaned":{state:"301"},"sensor.kamstrup_multical_forbrug_denne_maaned":{state:"179.4"},"sensor.luftkvalitet_spisestuen_carbon_dioxide":{state:"700"},"sensor.temp_fugtighed_stue_temperature":{state:"21.9"},"climate.stue":{state:"heat",attributes:{temperature:22}}},callApi:async()=>[]};
-document.body.append(card); if(!card.shadowRoot.querySelector(".utilities")||!card.shadowRoot.querySelector(".electricity").textContent.includes("399")||!card.shadowRoot.querySelector(".rooms").textContent.includes("21,9°")) throw Error("summary render failed");
+document.body.append(card);
+const root=card.shadowRoot, shell=root.querySelector(".card"), electricity=root.querySelector(".electricity"), stue=root.querySelector(".room");
+if(!root.querySelector(".utilities")||!electricity.textContent.includes("399")||!root.querySelector(".rooms").textContent.includes("21,9°")) throw Error("summary render failed");
+if(shell.style.getPropertyValue("--summary-status")!=="var(--success-color,#20e3a2)") throw Error("house status accent failed");
+if(electricity.style.getPropertyValue("--accent")!=="var(--success-color,#20e3a2)") throw Error("utility status accent failed");
+if(stue.classList.contains("warm")||stue.classList.contains("cold")||stue.classList.contains("unavailable")) throw Error("normal room status failed");
+const shellStyle=getComputedStyle(shell), utilityStyle=getComputedStyle(electricity);
+if(shellStyle.borderTopWidth!=="0px"||shellStyle.borderLeftWidth!=="3px") throw Error("house border style failed");
+if(utilityStyle.borderTopWidth!=="0px"||utilityStyle.borderLeftWidth!=="3px") throw Error("utility border style failed");
+if(!root.querySelector(".room.unavailable")) throw Error("missing room status failed");
+document.documentElement.dataset.test="pass";
 </script>

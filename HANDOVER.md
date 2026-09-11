@@ -1,5 +1,13 @@
 # Handover
 
+- Version 0.8.5 fjerner huskortets faste blå 1 px-ramme. Yderkort,
+  forbrugsfliser og rumfliser bruger nu kun en 3 px venstre statusaccent:
+  grøn ved normal/gyldig status, orange ved opmærksomhed, rød ved manglende
+  data og blå/orange for rum, der reelt er under/over setpunkt.
+- Mobilens layout og breakpoints er ikke ændret.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.5`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-summary-status-accents-20260911-173000`.
+
 - Version 0.8.4 retter at 14-dages kalenderlisten gjorde hele huskortet meget
   højt. Kalenderpanelet har nu `overflow: hidden`, mens listen bruger
   `flex: 1 1 0`, `height: 0` og intern overflow. Hændelser påvirker dermed ikke
