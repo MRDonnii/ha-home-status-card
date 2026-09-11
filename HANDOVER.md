@@ -1,5 +1,13 @@
 # Handover
 
+- Version 0.8.3 udvider kalenderen fra 7 dage/6 hændelser til 14 dage/op til
+  40 hændelser. Hændelserne scroller inde i kalenderpanelet med en diskret
+  accentfarvet scrollbar, så PC-layoutets totalhøjde ikke ændres.
+- `event_days` og `max_events` kan ændres i GUI-editoren. Kalendercache-nøglen
+  inkluderer begge værdier, så ændringer hentes korrekt.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.3`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-summary-scroll-calendar-20260911-194000`.
+
 - Version 0.8.2 lader PC-layoutet måle sin faktiske topplacering og browserens
   `innerHeight`. Det beregner automatisk den ledige højde ned mod navbaren og
   reserverer `bottom_gap` (110 px på forsiden). Beregningen køres igen ved

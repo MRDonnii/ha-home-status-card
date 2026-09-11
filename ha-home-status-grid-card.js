@@ -1,4 +1,4 @@
-const VERSION = "0.8.2";
+const VERSION = "0.8.3";
 
 const PRESETS = {
   home_energy: {
@@ -695,6 +695,8 @@ const SUMMARY_DEFAULTS = {
   air_quality_entity: "sensor.luftkvalitet_spisestuen_air_quality",
   water_flow_entity: "sensor.vandmaler_flow",
   storage_entity: "sensor.jt_net_protect_storage_utilization",
+  event_days: 14,
+  max_events: 40,
   hdd_entities: ["binary_sensor.jt_net_protect_hdd_1", "binary_sensor.jt_net_protect_hdd_2"],
   rooms: [
     { name: "Stue", icon: "mdi:sofa-outline", temperature: "sensor.temp_fugtighed_stue_temperature", climate: "climate.stue" },
@@ -765,15 +767,17 @@ class HaHomeSummaryCard extends HTMLElement {
   async _loadEvents() {
     if (!this._hass?.callApi || this._loadingEvents) return;
     const calendars = this.config.calendars || [];
-    const key = JSON.stringify(calendars.map((x) => x.entity));
+    const key = JSON.stringify([calendars.map((x) => x.entity),this.config.event_days,this.config.max_events]);
     if (key === this._eventsKey && Date.now() - (this._eventsAt || 0) < 300000) return;
     this._loadingEvents = true;
     try {
-      const start = new Date(); const end = new Date(start.getTime() + 7 * 86400000);
+      const start = new Date(); const days = Math.min(31, Math.max(1, Number(this.config.event_days) || 14));
+      const end = new Date(start.getTime() + days * 86400000);
       const events = [];
       const lists = await Promise.all(calendars.map((cal) => this._hass.callApi("GET", `calendars/${encodeURIComponent(cal.entity)}?start=${encodeURIComponent(start.toISOString())}&end=${encodeURIComponent(end.toISOString())}`)));
       calendars.forEach((cal, index) => (lists[index] || []).forEach((event) => events.push({ ...event, calendar: cal })));
-      this._events = events.sort((a,b) => new Date(a.start?.dateTime || a.start?.date) - new Date(b.start?.dateTime || b.start?.date)).slice(0, 6);
+      const limit = Math.min(100, Math.max(1, Number(this.config.max_events) || 40));
+      this._events = events.sort((a,b) => new Date(a.start?.dateTime || a.start?.date) - new Date(b.start?.dateTime || b.start?.date)).slice(0, limit);
       this._eventsKey = key; this._eventsAt = Date.now(); this._renderEvents();
     } catch (_) { this._events = this._fallbackEvents(); this._renderEvents(); }
     finally { this._loadingEvents = false; }
@@ -782,7 +786,7 @@ class HaHomeSummaryCard extends HTMLElement {
     return (this.config.calendars || []).map((calendar) => {
       const a = this._state(calendar.entity)?.attributes || {};
       return a.message && a.start_time ? { summary: a.message, start: { dateTime: a.start_time }, calendar } : null;
-    }).filter(Boolean).sort((a,b) => new Date(a.start.dateTime) - new Date(b.start.dateTime)).slice(0,6);
+    }).filter(Boolean).sort((a,b) => new Date(a.start.dateTime) - new Date(b.start.dateTime)).slice(0,Math.min(100,Math.max(1,Number(this.config.max_events)||40)));
   }
   _eventTime(event) {
     const raw = event.start?.dateTime || event.start?.date;
@@ -812,9 +816,9 @@ class HaHomeSummaryCard extends HTMLElement {
         .utilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:13px}.utility{position:relative;min-width:0;padding:13px 13px 12px 15px;border-radius:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 12%,transparent),color-mix(in srgb,var(--black,#000) 12%,transparent));border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);overflow:hidden}.utility:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--accent)}.utility-head{display:flex;align-items:center;gap:7px;color:var(--secondary-text-color,#a7b2c2);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.utility-head ha-icon{width:17px;height:17px;--mdc-icon-size:17px;color:var(--accent)}.use{display:flex;align-items:baseline;gap:4px;margin-top:7px}.use b{font-size:22px;line-height:1}.use span{font-size:10px;color:var(--secondary-text-color,#a7b2c2)}.cost{margin-top:7px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--accent) 22%,transparent);font-size:11px;color:var(--secondary-text-color,#a7b2c2)}.cost b{float:right;color:var(--primary-text-color,#fff);font-size:13px}.cost small{font-size:9px}
         .body{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(205px,.58fr);flex:1;min-height:0;gap:12px}.panel{padding:13px;border-radius:16px;background:color-mix(in srgb,var(--black,#000) 13%,transparent);border:1px solid color-mix(in srgb,var(--primary-text-color,#fff) 8%,transparent)}.panel h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px;color:var(--secondary-text-color,#a7b2c2)}
         .rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));grid-auto-rows:minmax(48px,1fr);gap:7px;height:calc(100% - 22px)}.room{--room-accent:var(--success-color,#20e3a2);position:relative;display:grid;grid-template-columns:31px minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;column-gap:7px;min-width:0;padding:7px 8px;border-radius:12px;background:linear-gradient(135deg,color-mix(in srgb,var(--room-accent) 10%,transparent),color-mix(in srgb,var(--primary-text-color,#fff) 3%,transparent));border:1px solid color-mix(in srgb,var(--room-accent) 24%,transparent)}.room.warm{--room-accent:var(--orange,#fb923c)}.room.cold{--room-accent:var(--info-color,#38bdf8)}.room-icon{grid-row:1/3;display:grid;place-items:center;width:31px;height:31px;border-radius:10px;background:color-mix(in srgb,var(--room-accent) 15%,transparent);color:var(--room-accent)}.room-icon ha-icon{width:17px;height:17px;--mdc-icon-size:17px}.room-name{grid-column:2/4;min-width:0;font-size:10px;font-weight:800;line-height:1.1;white-space:nowrap}.room-temp{grid-row:2;grid-column:3;font-size:16px;font-weight:900}.room-target{grid-row:2;grid-column:2;font-size:8px;color:var(--secondary-text-color,#a7b2c2);white-space:nowrap}.room-target b{color:var(--room-accent)}
-        .events{display:grid;gap:3px;align-content:start}.event{display:grid;grid-template-columns:34px 3px minmax(0,1fr);gap:7px;align-items:center;min-width:0;padding:3px 0}.event>.date{display:grid;place-items:center;align-content:center;height:33px;border-radius:9px;background:color-mix(in srgb,var(--event) 13%,transparent);border:1px solid color-mix(in srgb,var(--event) 30%,transparent)}.date span{font-size:7px!important;text-transform:uppercase;color:var(--event)!important;font-weight:900}.date b{font-size:14px!important;line-height:14px}.event>i{display:block;align-self:stretch;border-radius:5px;background:var(--event)}.event-copy{min-width:0}.event-copy b,.event-copy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event-copy b{font-size:11px}.event-copy span,.empty{font-size:9px;color:var(--secondary-text-color,#a7b2c2);margin-top:1px}
+        .agenda-panel{display:flex;flex-direction:column;min-height:0}.events{display:grid;gap:3px;align-content:start;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:5px;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--dashboard-accent,#38bdf8) 55%,transparent) transparent}.events::-webkit-scrollbar{width:5px}.events::-webkit-scrollbar-thumb{border-radius:8px;background:color-mix(in srgb,var(--dashboard-accent,#38bdf8) 55%,transparent)}.event{display:grid;grid-template-columns:34px 3px minmax(0,1fr);gap:7px;align-items:center;min-width:0;padding:3px 0}.event>.date{display:grid;place-items:center;align-content:center;height:33px;border-radius:9px;background:color-mix(in srgb,var(--event) 13%,transparent);border:1px solid color-mix(in srgb,var(--event) 30%,transparent)}.date span{font-size:7px!important;text-transform:uppercase;color:var(--event)!important;font-weight:900}.date b{font-size:14px!important;line-height:14px}.event>i{display:block;align-self:stretch;border-radius:5px;background:var(--event)}.event-copy{min-width:0}.event-copy b,.event-copy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event-copy b{font-size:11px}.event-copy span,.empty{font-size:9px;color:var(--secondary-text-color,#a7b2c2);margin-top:1px}
         @media(max-width:700px){.utilities{grid-template-columns:1fr}.body{grid-template-columns:1fr}.card{padding:14px}}
-      </style><ha-card class="card"><header><h2><ha-icon icon="mdi:home-analytics"></ha-icon><span class="title"></span></h2><span class="health"></span></header><div class="utilities"><section class="utility electricity" style="--accent:var(--dashboard-accent,#38bdf8)"></section><section class="utility water" style="--accent:var(--info-color,#22aee8)"></section><section class="utility heat" style="--accent:var(--orange,#fb923c)"></section></div><div class="body"><section class="panel"><h3>Temperaturer og setpunkter</h3><div class="rooms"></div></section><section class="panel"><h3>Næste i kalenderen</h3><div class="events"></div></section></div></ha-card>`;
+      </style><ha-card class="card"><header><h2><ha-icon icon="mdi:home-analytics"></ha-icon><span class="title"></span></h2><span class="health"></span></header><div class="utilities"><section class="utility electricity" style="--accent:var(--dashboard-accent,#38bdf8)"></section><section class="utility water" style="--accent:var(--info-color,#22aee8)"></section><section class="utility heat" style="--accent:var(--orange,#fb923c)"></section></div><div class="body"><section class="panel"><h3>Temperaturer og setpunkter</h3><div class="rooms"></div></section><section class="panel agenda-panel"><h3>Næste i kalenderen</h3><div class="events"></div></section></div></ha-card>`;
       this._rendered = true;
     }
     if (!this._hass) return;
@@ -848,7 +852,7 @@ class HaHomeSummaryCardEditor extends HTMLElement {
   setConfig(config){this.config=structuredClone(config);this.render();}
   set hass(hass){this._hass=hass;}
   render(){
-    const fields=[["title","Titel"],["monthly_energy_entity","Strøm denne måned"],["electricity_price_entity","Aktuel elpris til estimat"],["electric_month_cost_entity","Eksakt månedlig elpris (valgfri)"],["water_month_entity","Vand denne måned"],["water_month_cost_entity","Vandpris denne måned"],["heat_month_entity","Fjernvarme denne måned"],["heat_month_cost_entity","Fjernvarmepris denne måned"],["co2_entity","CO₂"],["air_quality_entity","Luftkvalitet"],["water_flow_entity","Vandflow"],["storage_entity","Protect lager"]];
+    const fields=[["title","Titel"],["event_days","Kalenderdage"],["max_events","Maks. hændelser"],["monthly_energy_entity","Strøm denne måned"],["electricity_price_entity","Aktuel elpris til estimat"],["electric_month_cost_entity","Eksakt månedlig elpris (valgfri)"],["water_month_entity","Vand denne måned"],["water_month_cost_entity","Vandpris denne måned"],["heat_month_entity","Fjernvarme denne måned"],["heat_month_cost_entity","Fjernvarmepris denne måned"],["co2_entity","CO₂"],["air_quality_entity","Luftkvalitet"],["water_flow_entity","Vandflow"],["storage_entity","Protect lager"]];
     this.innerHTML=`<style>label{display:block;margin:10px 0 4px;font-weight:600}input{box-sizing:border-box;width:100%;padding:10px;border:1px solid var(--divider-color);border-radius:8px;background:transparent;color:inherit}</style>${fields.map(([key,label])=>`<label>${label}</label><input data-key="${key}" value="${this.config?.[key]||SUMMARY_DEFAULTS[key]||''}">`).join('')}`;
     this.querySelectorAll("input").forEach((input)=>input.addEventListener("change",()=>this.dispatchEvent(new CustomEvent("config-changed",{bubbles:true,composed:true,detail:{config:{...this.config,[input.dataset.key]:input.value}}}))));
   }
