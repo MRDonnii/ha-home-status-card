@@ -1,4 +1,4 @@
-const VERSION = "0.6.0";
+const VERSION = "0.7.0";
 
 const PRESETS = {
   home_energy: {
@@ -696,6 +696,14 @@ const SUMMARY_DEFAULTS = {
   water_flow_entity: "sensor.vandmaler_flow",
   storage_entity: "sensor.jt_net_protect_storage_utilization",
   hdd_entities: ["binary_sensor.jt_net_protect_hdd_1", "binary_sensor.jt_net_protect_hdd_2"],
+  rooms: [
+    { name: "Stue", icon: "mdi:sofa-outline", temperature: "sensor.temp_fugtighed_stue_temperature", climate: "climate.stue" },
+    { name: "Spisestue", icon: "mdi:table-chair", temperature: "sensor.temp_fugtighed_spisestuen_temperature", climate: "climate.spisestue" },
+    { name: "Køkken", icon: "mdi:countertop-outline", temperature: "sensor.temp_fugtighed_kokken_temperature", climate: "climate.kokken" },
+    { name: "Kontor", icon: "mdi:desk", temperature: "sensor.temp_fugtighed_kontor_temperature", climate: "climate.kontor" },
+    { name: "Mads", icon: "mdi:bed-single-outline", temperature: "sensor.temp_fugtighed_mads_temperature", climate: "climate.mads" },
+    { name: "Viggo", icon: "mdi:bed-single-outline", temperature: "sensor.temp_fugtighed_viggo_temperature", climate: "climate.viggo" },
+  ],
   calendars: [
     { entity: "calendar.th_faelles", name: "Fælles", color: "var(--orange, #fb923c)" },
     { entity: "calendar.mads", name: "Mads", color: "var(--yellow, #facc15)" },
@@ -727,6 +735,7 @@ class HaHomeSummaryCard extends HTMLElement {
       this.config?.heat_month_cost_entity,
       this.config?.co2_entity, this.config?.air_quality_entity, this.config?.water_flow_entity,
       this.config?.storage_entity, ...(this.config?.hdd_entities || []),
+      ...(this.config?.rooms || []).flatMap((room) => [room.temperature, room.climate]),
       ...(this.config?.calendars || []).map((x) => x.entity)].filter(Boolean);
     const sig = JSON.stringify(ids.map((id) => [id, hass.states?.[id]?.state,
       hass.states?.[id]?.last_changed, hass.states?.[id]?.attributes?.message,
@@ -795,10 +804,11 @@ class HaHomeSummaryCard extends HTMLElement {
         :host{display:block}.card{position:relative;overflow:hidden;padding:18px;border-radius:22px;background:linear-gradient(145deg,color-mix(in srgb,var(--white,#fff) 5%,transparent),transparent 42%),var(--ha-card-background,var(--surface,#15191f));border:1px solid color-mix(in srgb,var(--dashboard-accent,#38bdf8) 32%,transparent);box-shadow:0 12px 28px color-mix(in srgb,var(--black,#000) 22%,transparent);color:var(--primary-text-color,#fff)}
         header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}h2{font-size:20px;margin:0;display:flex;align-items:center;gap:9px}h2 ha-icon{color:var(--dashboard-accent,#38bdf8)}.health{font-size:12px;font-weight:800;padding:6px 10px;border-radius:99px;background:color-mix(in srgb,var(--success-color,#20e3a2) 14%,transparent);color:var(--success-color,#20e3a2)}
         .utilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:13px}.utility{position:relative;min-width:0;padding:13px 13px 12px 15px;border-radius:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 12%,transparent),color-mix(in srgb,var(--black,#000) 12%,transparent));border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);overflow:hidden}.utility:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--accent)}.utility-head{display:flex;align-items:center;gap:7px;color:var(--secondary-text-color,#a7b2c2);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.utility-head ha-icon{width:17px;height:17px;--mdc-icon-size:17px;color:var(--accent)}.use{display:flex;align-items:baseline;gap:4px;margin-top:7px}.use b{font-size:22px;line-height:1}.use span{font-size:10px;color:var(--secondary-text-color,#a7b2c2)}.cost{margin-top:7px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--accent) 22%,transparent);font-size:11px;color:var(--secondary-text-color,#a7b2c2)}.cost b{float:right;color:var(--primary-text-color,#fff);font-size:13px}.cost small{font-size:9px}
-        .body{display:grid;grid-template-columns:minmax(180px,.78fr) minmax(0,1.22fr);gap:12px}.panel{padding:13px;border-radius:16px;background:color-mix(in srgb,var(--black,#000) 13%,transparent);border:1px solid color-mix(in srgb,var(--primary-text-color,#fff) 8%,transparent)}.panel h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px;color:var(--secondary-text-color,#a7b2c2)}
-        .status{display:grid;gap:8px}.row{display:flex;align-items:center;gap:8px;font-size:12px}.row ha-icon{width:17px;height:17px;--mdc-icon-size:17px;color:var(--dashboard-accent,#38bdf8)}.row b{margin-left:auto}.events{display:grid;gap:6px}.event{display:grid;grid-template-columns:36px 3px minmax(0,1fr);gap:8px;align-items:center;min-width:0;padding:5px 0}.event>.date{display:grid;place-items:center;align-content:center;height:35px;border-radius:10px;background:color-mix(in srgb,var(--event) 13%,transparent);border:1px solid color-mix(in srgb,var(--event) 30%,transparent)}.date span{font-size:8px!important;text-transform:uppercase;color:var(--event)!important;font-weight:900}.date b{font-size:15px!important;line-height:15px}.event>i{display:block;align-self:stretch;border-radius:5px;background:var(--event)}.event-copy{min-width:0}.event-copy b,.event-copy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event-copy b{font-size:12px}.event-copy span,.empty{font-size:10px;color:var(--secondary-text-color,#a7b2c2);margin-top:2px}
+        .body{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(210px,.72fr);gap:12px}.panel{padding:13px;border-radius:16px;background:color-mix(in srgb,var(--black,#000) 13%,transparent);border:1px solid color-mix(in srgb,var(--primary-text-color,#fff) 8%,transparent)}.panel h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px;color:var(--secondary-text-color,#a7b2c2)}
+        .rooms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,1fr);gap:7px;height:calc(100% - 22px)}.room{--room-accent:var(--success-color,#20e3a2);position:relative;display:grid;grid-template-columns:34px minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;column-gap:9px;min-width:0;padding:9px 10px;border-radius:12px;background:linear-gradient(135deg,color-mix(in srgb,var(--room-accent) 10%,transparent),color-mix(in srgb,var(--primary-text-color,#fff) 3%,transparent));border:1px solid color-mix(in srgb,var(--room-accent) 24%,transparent)}.room.warm{--room-accent:var(--orange,#fb923c)}.room.cold{--room-accent:var(--info-color,#38bdf8)}.room-icon{grid-row:1/3;display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:color-mix(in srgb,var(--room-accent) 15%,transparent);color:var(--room-accent)}.room-icon ha-icon{width:19px;height:19px;--mdc-icon-size:19px}.room-name{min-width:0;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.room-temp{grid-row:1/3;grid-column:3;font-size:18px;font-weight:900}.room-target{font-size:9px;color:var(--secondary-text-color,#a7b2c2)}.room-target b{color:var(--room-accent)}
+        .events{display:grid;gap:3px;align-content:start}.event{display:grid;grid-template-columns:34px 3px minmax(0,1fr);gap:7px;align-items:center;min-width:0;padding:3px 0}.event>.date{display:grid;place-items:center;align-content:center;height:33px;border-radius:9px;background:color-mix(in srgb,var(--event) 13%,transparent);border:1px solid color-mix(in srgb,var(--event) 30%,transparent)}.date span{font-size:7px!important;text-transform:uppercase;color:var(--event)!important;font-weight:900}.date b{font-size:14px!important;line-height:14px}.event>i{display:block;align-self:stretch;border-radius:5px;background:var(--event)}.event-copy{min-width:0}.event-copy b,.event-copy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event-copy b{font-size:11px}.event-copy span,.empty{font-size:9px;color:var(--secondary-text-color,#a7b2c2);margin-top:1px}
         @media(max-width:700px){.utilities{grid-template-columns:1fr}.body{grid-template-columns:1fr}.card{padding:14px}}
-      </style><ha-card class="card"><header><h2><ha-icon icon="mdi:home-analytics"></ha-icon><span class="title"></span></h2><span class="health"></span></header><div class="utilities"><section class="utility electricity" style="--accent:var(--dashboard-accent,#38bdf8)"></section><section class="utility water" style="--accent:var(--info-color,#22aee8)"></section><section class="utility heat" style="--accent:var(--orange,#fb923c)"></section></div><div class="body"><section class="panel"><h3>Indeklima og teknik</h3><div class="status"></div></section><section class="panel"><h3>Næste i kalenderen</h3><div class="events"></div></section></div></ha-card>`;
+      </style><ha-card class="card"><header><h2><ha-icon icon="mdi:home-analytics"></ha-icon><span class="title"></span></h2><span class="health"></span></header><div class="utilities"><section class="utility electricity" style="--accent:var(--dashboard-accent,#38bdf8)"></section><section class="utility water" style="--accent:var(--info-color,#22aee8)"></section><section class="utility heat" style="--accent:var(--orange,#fb923c)"></section></div><div class="body"><section class="panel"><h3>Temperaturer og setpunkter</h3><div class="rooms"></div></section><section class="panel"><h3>Næste i kalenderen</h3><div class="events"></div></section></div></ha-card>`;
       this._rendered = true;
     }
     if (!this._hass) return;
@@ -806,8 +816,7 @@ class HaHomeSummaryCard extends HTMLElement {
     const exactElectricCost=this._num(c.electric_month_cost_entity), electricCost=Number.isFinite(exactElectricCost)?exactElectricCost:monthly*currentPrice;
     const water=this._num(c.water_month_entity), waterCost=this._num(c.water_month_cost_entity);
     const heat=this._num(c.heat_month_entity), heatCost=this._num(c.heat_month_cost_entity);
-    const co2=this._num(c.co2_entity), air=this._state(c.air_quality_entity)?.state || "unknown";
-    const flow=this._num(c.water_flow_entity), storage=this._num(c.storage_entity);
+    const co2=this._num(c.co2_entity);
     const diskProblem=(c.hdd_entities||[]).some((id)=>this._state(id)?.state==="on");
     const healthy=!diskProblem && (!Number.isFinite(co2)||co2<1000);
     this.shadowRoot.querySelector(".title").textContent=c.title;
@@ -816,7 +825,12 @@ class HaHomeSummaryCard extends HTMLElement {
     utility(".electricity","mdi:lightning-bolt","Strøm",this._fmt(monthly,0),"kWh",this._fmt(electricCost,0),!Number.isFinite(exactElectricCost));
     utility(".water","mdi:water","Vand",this._fmt(water,3),"m³",this._fmt(waterCost,0));
     utility(".heat","mdi:radiator","Fjernvarme",this._fmt(heat,1),"kWh",this._fmt(heatCost,0));
-    this.shadowRoot.querySelector(".status").innerHTML=`<div class="row"><ha-icon icon="mdi:molecule-co2"></ha-icon><span>CO₂ i huset</span><b>${this._fmt(co2,0)} ppm</b></div><div class="row"><ha-icon icon="mdi:air-filter"></ha-icon><span>Luftkvalitet</span><b>${this._esc(this._label(air))}</b></div><div class="row"><ha-icon icon="mdi:water-pump"></ha-icon><span>Vandflow nu</span><b>${this._fmt(flow,0)} L/t</b></div><div class="row"><ha-icon icon="mdi:harddisk"></ha-icon><span>Protect lager</span><b>${this._fmt(storage,1)} %</b></div><div class="row"><ha-icon icon="mdi:server-security"></ha-icon><span>Harddiske</span><b>${diskProblem?"Fejl":"OK"}</b></div>`;
+    this.shadowRoot.querySelector(".rooms").innerHTML=(c.rooms||[]).map((room)=>{
+      const temp=this._num(room.temperature), target=Number(this._state(room.climate)?.attributes?.temperature);
+      const delta=Number.isFinite(temp)&&Number.isFinite(target)?temp-target:Number.NaN;
+      const tone=delta>0.7?"warm":delta<-.7?"cold":"";
+      return `<div class="room ${tone}"><span class="room-icon"><ha-icon icon="${this._esc(room.icon||'mdi:thermometer')}"></ha-icon></span><span class="room-name">${this._esc(room.name)}</span><span class="room-target">Mål <b>${this._fmt(target,1)}°</b></span><strong class="room-temp">${this._fmt(temp,1)}°</strong></div>`;
+    }).join("");
     this._renderEvents();
   }
   getCardSize(){return 6;}

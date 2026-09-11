@@ -1,5 +1,12 @@
 # Handover
 
+- Version 0.7.0 erstatter tekniklisten med seks kompakte rumfliser inspireret
+  af Temperaturer & termostatmål: aktuel temperatur, setpunkt, rumikon og
+  blå/orange afvigelsesaccent. Temperaturdelen har nu mere bredde end den
+  komprimerede kalendertidslinje.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.7.0`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-summary-temperature-price-height-20260911-170500`.
+
 - Version 0.6.0 bygger husoverblikket om i samme flise-/statussprog som de
   øvrige forsidekort. Tre ens månedsfliser viser strøm (399,48 kWh), vand
   (4,635 m3) og fjernvarme (301 kWh) med tilhørende månedspris.

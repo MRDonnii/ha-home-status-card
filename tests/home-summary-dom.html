@@ -6,6 +6,6 @@ window.loadCardHelpers=async()=>({});
 <script src="../ha-home-status-grid-card.js"></script>
 <script>
 const card=document.createElement("ha-home-summary-card"); card.setConfig({title:"Husstatus"});
-card.hass={states:{"sensor.manedlig_stromforbrug":{state:"399.4"},"sensor.stromligning_current_price_vat":{state:"2.01"},"sensor.vandmaler_manedens_forbrug":{state:"4.635"},"sensor.vandmaler_manedens_pris":{state:"359"},"sensor.kamstrup_multical_energi_maaned":{state:"301"},"sensor.kamstrup_multical_forbrug_denne_maaned":{state:"179.4"},"sensor.luftkvalitet_spisestuen_carbon_dioxide":{state:"700"},"sensor.luftkvalitet_spisestuen_air_quality":{state:"good"},"sensor.vandmaler_flow":{state:"257"}},callApi:async()=>[]};
-document.body.append(card); if(!card.shadowRoot.querySelector(".utilities")||!card.shadowRoot.querySelector(".electricity").textContent.includes("399")) throw Error("summary render failed");
+card.hass={states:{"sensor.manedlig_stromforbrug":{state:"399.4"},"sensor.stromligning_current_price_vat":{state:"2.01"},"sensor.vandmaler_manedens_forbrug":{state:"4.635"},"sensor.vandmaler_manedens_pris":{state:"359"},"sensor.kamstrup_multical_energi_maaned":{state:"301"},"sensor.kamstrup_multical_forbrug_denne_maaned":{state:"179.4"},"sensor.luftkvalitet_spisestuen_carbon_dioxide":{state:"700"},"sensor.temp_fugtighed_stue_temperature":{state:"21.9"},"climate.stue":{state:"heat",attributes:{temperature:22}}},callApi:async()=>[]};
+document.body.append(card); if(!card.shadowRoot.querySelector(".utilities")||!card.shadowRoot.querySelector(".electricity").textContent.includes("399")||!card.shadowRoot.querySelector(".rooms").textContent.includes("21,9°")) throw Error("summary render failed");
 </script>
