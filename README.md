@@ -9,7 +9,7 @@ preset: home_energy
 
 Indbyggede funktioner: `home_energy`, `ev`, `electricity_price`, `pool`, `pet`, `security`, `heating`, `settings` og generisk `entity`. Alle standardværdier kan overskrives på det enkelte kort.
 
-Pakken indeholder også `custom:ha-home-summary-card`, der supplerer forsiden med månedens elforbrug, vandforbrug og vandpris, dagens fjernvarme, indendørs CO₂/luftkvalitet, Protect-drift og de næste syv dages kalenderhændelser i ét responsivt kort. Det undgår at gentage forsidens eksisterende effekt-, pris-, person- og sikkerhedskort.
+Pakken indeholder også `custom:ha-home-summary-card`, der supplerer forsiden med tre ens månedsblokke for strøm, vand og fjernvarme. Hver blok viser både forbrug og månedspris; strømprisen markeres som estimeret, når der ikke er konfigureret en eksakt månedlig prissensor. Kortet viser også indendørs CO₂/luftkvalitet, Protect-drift og en kompakt datobaseret tidslinje med de næste syv dages kalenderhændelser. Det undgår at gentage forsidens eksisterende effekt-, pris-, person- og sikkerhedskort.
 
 ```yaml
 type: custom:ha-home-summary-card

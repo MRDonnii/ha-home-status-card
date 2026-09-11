@@ -1,1 +1,1 @@
-{"name":"ha-home-status-card","version":"0.5.1","private":true,"scripts":{"check":"node --check ha-home-status-grid-card.js"}}
+{"name":"ha-home-status-card","version":"0.6.0","private":true,"scripts":{"check":"node --check ha-home-status-grid-card.js"}}

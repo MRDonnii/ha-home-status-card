@@ -1,5 +1,17 @@
 # Handover
 
+- Version 0.6.0 bygger husoverblikket om i samme flise-/statussprog som de
+  øvrige forsidekort. Tre ens månedsfliser viser strøm (399,48 kWh), vand
+  (4,635 m3) og fjernvarme (301 kWh) med tilhørende månedspris.
+- Vand og fjernvarme bruger eksisterende eksakte månedssensorer. Der findes
+  ingen eksakt månedlig elprissensor, så elflisen beregner og mærker prisen som
+  et estimat ud fra månedens kWh og den aktuelle samlede kWh-pris. En valgfri
+  `electric_month_cost_entity` i GUI'en kan senere erstatte estimatet.
+- Kalenderen er redesignet til en kompakt tidslinje med farvekodet datofelt,
+  hændelsestitel, tidspunkt og kalendernavn.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.6.0`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-summary-monthly-redesign-20260911-184000`.
+
 - Version 0.5.1 tilføjer `custom:ha-home-summary-card`, som kun bruges under
   de bevægelsesstyrede kameraer på PC-forsiden. Kortet viser supplerende data,
   der ikke allerede findes i forsidens højrekolonne: månedens el, dagens vand
