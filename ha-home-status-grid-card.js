@@ -1,4 +1,4 @@
-const VERSION = "0.4.5";
+const VERSION = "0.4.6";
 
 const PRESETS = {
   home_energy: {
@@ -98,7 +98,6 @@ const PRESETS = {
     pressure_entity: "sensor.wavin_calefa_2_anlaegstryk",
     source_entity: "sensor.billigste_opvarmning_status",
     daily_entity: "sensor.kamstrup_multical_energi_dag",
-    fallback_daily_entity: "sensor.fjernvarme_dagligt_forbrug",
     water_regulator_entity: "sensor.wavin_calefa_2_dhw_regulator_state",
     blocked_by_entity: "sensor.wavin_calefa_2_bvv_blokeret_af",
     valve_entity: "sensor.wavin_calefa_2_cvv_ventilposition",
