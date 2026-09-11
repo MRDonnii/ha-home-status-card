@@ -1,5 +1,12 @@
 # Handover
 
+- Version 0.8.9 fjerner det lille venstre ikon fra temperaturfliserne, så
+  navn, setpunkt og fugtighed starter direkte ved venstre indholdskant. Det
+  store afdæmpede ikon nederst til højre bevares. Teksten `Intet setpunkt` er
+  fjernet; uden setpunkt vises kun fugtighed, når den findes.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.9`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-summary-room-cleanup-20260911-175500`.
+
 - Version 0.8.8 giver temperaturfliserne samme neutrale overflade som de
   øvrige kort. Det lille ikon er gjort mere kompakt, så navn, setpunkt og
   temperatur starter længere mod venstre, og hvert rum har nu et stort,
