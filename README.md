@@ -34,6 +34,9 @@ Kalenderdelen viser som standard op til 40 hændelser fra de næste 14 dage i en
 selvstændig scrollbar. `event_days` og `max_events` kan ændres i GUI-editoren,
 uden at kortets eller PC-layoutets samlede højde vokser.
 
+Listen bruger `flex-basis: 0`, `height: 0` og et skjult ydre panel-overflow, så
+antallet af hændelser ikke bidrager til kortets naturlige minimumshøjde.
+
 Bilfunktionen viser `Planlagt`, når Monta melder en aktiv ladeplan via
 `schedule_entity` eller `charger_state_entity`. Ved aktiv opladning vises den
 aktuelle ladeeffekt i stedet. Entiteterne kan overskrives på kortet til andre

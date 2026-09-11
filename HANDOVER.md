@@ -1,5 +1,12 @@
 # Handover
 
+- Version 0.8.4 retter at 14-dages kalenderlisten gjorde hele huskortet meget
+  højt. Kalenderpanelet har nu `overflow: hidden`, mens listen bruger
+  `flex: 1 1 0`, `height: 0` og intern overflow. Hændelser påvirker dermed ikke
+  kortets naturlige minimumshøjde.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.4`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-summary-calendar-height-fix-20260911-195000`.
+
 - Version 0.8.3 udvider kalenderen fra 7 dage/6 hændelser til 14 dage/op til
   40 hændelser. Hændelserne scroller inde i kalenderpanelet med en diskret
   accentfarvet scrollbar, så PC-layoutets totalhøjde ikke ændres.
