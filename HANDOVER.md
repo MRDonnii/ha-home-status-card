@@ -1,5 +1,10 @@
 # Handover
 
+- Version 0.8.13 komprimerer statusrækkerne til 72 px på korte PC-viewports
+  og giver kalenderen mere bredde (1,25/0,75 i stedet for 1,7/0,55), mens
+  temperaturerne fortsat står i tre kolonner. Mobil er uændret.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.13`.
+
 - Version 0.8.12 retter PC-layout ved 100 % browserzoom og lavere skærmhøjde.
   Desktop-wrapperen bruger nu en eksakt højde ud fra den aktuelle visuelle
   viewport, kortets faktiske top og `bottom_gap`, så indholdet ikke kan vokse
