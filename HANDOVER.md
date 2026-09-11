@@ -1,5 +1,12 @@
 # Handover
 
+- Version 0.8.1 gør rumfliserne mindst 160 px brede og reserverer hele den
+  øverste tekstlinje til rumnavnet. Temperatur og setpunkt ligger sammen på
+  nederste linje, så Spisestue, Soveværelse, Badeværelse, Bryggers og Lille WC
+  ikke længere afkortes.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.1`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-summary-room-names-20260911-171500`.
+
 - Version 0.8.0 tilføjer `custom:ha-home-desktop-layout-card`: et PC-only
   stretch-layout med to fælles kolonner. Sidste kort i hver kolonne udfylder
   automatisk resthøjden, så kolonnerne altid får samme bundlinje uden faste
