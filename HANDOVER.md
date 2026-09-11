@@ -1,5 +1,12 @@
 # Handover
 
+- Version 0.8.6 fjerner statusfarvens toning fra de tre forbrugsflisers
+  baggrund. Fliserne bruger nu samme neutrale temaoverflade og skygge som de
+  øvrige kort, mens statusfarven kun bruges i venstre accent og ikoner. Hver
+  flise har desuden et stort, afdæmpet fagikon nederst til højre.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.6`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-summary-utility-style-20260911-174000`.
+
 - Version 0.8.5 fjerner huskortets faste blå 1 px-ramme. Yderkort,
   forbrugsfliser og rumfliser bruger nu kun en 3 px venstre statusaccent:
   grøn ved normal/gyldig status, orange ved opmærksomhed, rød ved manglende

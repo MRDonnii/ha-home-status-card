@@ -17,6 +17,7 @@ if(stue.classList.contains("warm")||stue.classList.contains("cold")||stue.classL
 const shellStyle=getComputedStyle(shell), utilityStyle=getComputedStyle(electricity);
 if(shellStyle.borderTopWidth!=="0px"||shellStyle.borderLeftWidth!=="3px") throw Error("house border style failed");
 if(utilityStyle.borderTopWidth!=="0px"||utilityStyle.borderLeftWidth!=="3px") throw Error("utility border style failed");
+if(!electricity.querySelector(".utility-bg")||getComputedStyle(electricity.querySelector(".utility-bg")).position!=="absolute") throw Error("utility background icon failed");
 if(!root.querySelector(".room.unavailable")) throw Error("missing room status failed");
 document.documentElement.dataset.test="pass";
 </script>
