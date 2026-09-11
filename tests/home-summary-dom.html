@@ -7,7 +7,7 @@ window.loadCardHelpers=async()=>({});
 <body></body>
 <script>
 const card=document.createElement("ha-home-summary-card"); card.setConfig({title:"Husstatus"});
-card.hass={states:{"sensor.manedlig_stromforbrug":{state:"399.4"},"sensor.stromligning_current_price_vat":{state:"2.01"},"sensor.vandmaler_manedens_forbrug":{state:"4.635"},"sensor.vandmaler_manedens_pris":{state:"359"},"sensor.kamstrup_multical_energi_maaned":{state:"301"},"sensor.kamstrup_multical_forbrug_denne_maaned":{state:"179.4"},"sensor.luftkvalitet_spisestuen_carbon_dioxide":{state:"700"},"sensor.temp_fugtighed_stue_temperature":{state:"21.9"},"climate.stue":{state:"heat",attributes:{temperature:22}}},callApi:async()=>[]};
+card.hass={states:{"sensor.manedlig_stromforbrug":{state:"399.4"},"sensor.stromligning_current_price_vat":{state:"2.01"},"sensor.vandmaler_manedens_forbrug":{state:"4.635"},"sensor.vandmaler_manedens_pris":{state:"359"},"sensor.kamstrup_multical_energi_maaned":{state:"301"},"sensor.kamstrup_multical_forbrug_denne_maaned":{state:"179.4"},"sensor.luftkvalitet_spisestuen_carbon_dioxide":{state:"700"},"sensor.temp_fugtighed_stue_temperature":{state:"21.9"},"sensor.temp_fugtighed_stue_humidity":{state:"56.3"},"climate.stue":{state:"heat",attributes:{temperature:22}}},callApi:async()=>[]};
 document.body.append(card);
 const root=card.shadowRoot, shell=root.querySelector(".card"), electricity=root.querySelector(".electricity"), stue=root.querySelector(".room");
 if(!root.querySelector(".utilities")||!electricity.textContent.includes("399")||!root.querySelector(".rooms").textContent.includes("21,9°")) throw Error("summary render failed");
@@ -19,5 +19,8 @@ if(shellStyle.borderTopWidth!=="0px"||shellStyle.borderLeftWidth!=="3px") throw 
 if(utilityStyle.borderTopWidth!=="0px"||utilityStyle.borderLeftWidth!=="3px") throw Error("utility border style failed");
 if(!electricity.querySelector(".utility-bg")||getComputedStyle(electricity.querySelector(".utility-bg")).position!=="absolute") throw Error("utility background icon failed");
 if(!root.querySelector(".room.unavailable")) throw Error("missing room status failed");
+if(!stue.querySelector(".room-bg")||getComputedStyle(stue.querySelector(".room-bg")).position!=="absolute") throw Error("room background icon failed");
+if(getComputedStyle(stue).backgroundImage!=="none") throw Error("room background must stay neutral");
+if(!stue.querySelector(".room-humidity")||!stue.textContent.includes("56%")) throw Error("room humidity failed");
 document.documentElement.dataset.test="pass";
 </script>

@@ -1,5 +1,14 @@
 # Handover
 
+- Version 0.8.8 giver temperaturfliserne samme neutrale overflade som de
+  øvrige kort. Det lille ikon er gjort mere kompakt, så navn, setpunkt og
+  temperatur starter længere mod venstre, og hvert rum har nu et stort,
+  afdæmpet rumikon nederst til højre. Statusfarven bruges fortsat kun i
+  venstre accent og ikoner. Luftfugtighed vises kompakt ved siden af
+  setpunktet for alle rum med en tilgængelig fugtsensor.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.8`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-summary-room-style-20260911-175000`.
+
 - Version 0.8.6 fjerner statusfarvens toning fra de tre forbrugsflisers
   baggrund. Fliserne bruger nu samme neutrale temaoverflade og skygge som de
   øvrige kort, mens statusfarven kun bruges i venstre accent og ikoner. Hver

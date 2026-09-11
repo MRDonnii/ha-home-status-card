@@ -1,4 +1,4 @@
-const VERSION = "0.8.6";
+const VERSION = "0.8.8";
 
 const PRESETS = {
   home_energy: {
@@ -699,18 +699,18 @@ const SUMMARY_DEFAULTS = {
   max_events: 40,
   hdd_entities: ["binary_sensor.jt_net_protect_hdd_1", "binary_sensor.jt_net_protect_hdd_2"],
   rooms: [
-    { name: "Stue", icon: "mdi:sofa-outline", temperature: "sensor.temp_fugtighed_stue_temperature", climate: "climate.stue" },
-    { name: "Spisestue", icon: "mdi:table-chair", temperature: "sensor.temp_fugtighed_spisestuen_temperature", climate: "climate.spisestue" },
-    { name: "Køkken", icon: "mdi:countertop-outline", temperature: "sensor.temp_fugtighed_kokken_temperature", climate: "climate.kokken" },
-    { name: "Kontor", icon: "mdi:desk", temperature: "sensor.temp_fugtighed_kontor_temperature", climate: "climate.kontor" },
-    { name: "Mads", icon: "mdi:bed-single-outline", temperature: "sensor.temp_fugtighed_mads_temperature", climate: "climate.mads" },
-    { name: "Viggo", icon: "mdi:bed-single-outline", temperature: "sensor.temp_fugtighed_viggo_temperature", climate: "climate.viggo" },
-    { name: "Soveværelse", icon: "mdi:bed-king-outline", temperature: "sensor.luftkvalitet_sovevaerelse_temperature" },
-    { name: "Badeværelse", icon: "mdi:shower", temperature: "sensor.temp_fugtighed_badevaerelse_temperature" },
-    { name: "Bryggers", icon: "mdi:washing-machine", temperature: "sensor.temp_fugtighed_bryggers_temperature" },
-    { name: "Lille WC", icon: "mdi:toilet", temperature: "sensor.temp_fugtighed_lille_wc_temperature" },
-    { name: "Garage", icon: "mdi:garage-variant", temperature: "sensor.temp_fugtighed_garage_temperature", climate: "climate.garagen" },
-    { name: "Loft", icon: "mdi:home-roof", temperature: "sensor.temp_fugtighed_loftet_temperature" },
+    { name: "Stue", icon: "mdi:sofa-outline", temperature: "sensor.temp_fugtighed_stue_temperature", humidity: "sensor.temp_fugtighed_stue_humidity", climate: "climate.stue" },
+    { name: "Spisestue", icon: "mdi:table-chair", temperature: "sensor.temp_fugtighed_spisestuen_temperature", humidity: "sensor.temp_fugtighed_spisestuen_humidity", climate: "climate.spisestue" },
+    { name: "Køkken", icon: "mdi:countertop-outline", temperature: "sensor.temp_fugtighed_kokken_temperature", humidity: "sensor.temp_fugtighed_kokken_humidity", climate: "climate.kokken" },
+    { name: "Kontor", icon: "mdi:desk", temperature: "sensor.temp_fugtighed_kontor_temperature", humidity: "sensor.temp_fugtighed_kontor_humidity", climate: "climate.kontor" },
+    { name: "Mads", icon: "mdi:bed-single-outline", temperature: "sensor.temp_fugtighed_mads_temperature", humidity: "sensor.temp_fugtighed_mads_humidity", climate: "climate.mads" },
+    { name: "Viggo", icon: "mdi:bed-single-outline", temperature: "sensor.temp_fugtighed_viggo_temperature", humidity: "sensor.temp_fugtighed_viggo_humidity", climate: "climate.viggo" },
+    { name: "Soveværelse", icon: "mdi:bed-king-outline", temperature: "sensor.luftkvalitet_sovevaerelse_temperature", humidity: "sensor.luftkvalitet_sovevaerelse_humidity" },
+    { name: "Badeværelse", icon: "mdi:shower", temperature: "sensor.temp_fugtighed_badevaerelse_temperature", humidity: "sensor.temp_fugtighed_badevaerelse_humidity" },
+    { name: "Bryggers", icon: "mdi:washing-machine", temperature: "sensor.temp_fugtighed_bryggers_temperature", humidity: "sensor.temp_fugtighed_bryggers_humidity" },
+    { name: "Lille WC", icon: "mdi:toilet", temperature: "sensor.temp_fugtighed_lille_wc_temperature", humidity: "sensor.temp_fugtighed_lille_wc_humidity" },
+    { name: "Garage", icon: "mdi:garage-variant", temperature: "sensor.temp_fugtighed_garage_temperature", humidity: "sensor.temp_fugtighed_garage_humidity", climate: "climate.garagen" },
+    { name: "Loft", icon: "mdi:home-roof", temperature: "sensor.temp_fugtighed_loftet_temperature", humidity: "sensor.temp_fugtighed_loftet_humidity" },
   ],
   calendars: [
     { entity: "calendar.th_faelles", name: "Fælles", color: "var(--orange, #fb923c)" },
@@ -743,7 +743,7 @@ class HaHomeSummaryCard extends HTMLElement {
       this.config?.heat_month_cost_entity,
       this.config?.co2_entity, this.config?.air_quality_entity, this.config?.water_flow_entity,
       this.config?.storage_entity, ...(this.config?.hdd_entities || []),
-      ...(this.config?.rooms || []).flatMap((room) => [room.temperature, room.climate]),
+      ...(this.config?.rooms || []).flatMap((room) => [room.temperature, room.humidity, room.climate]),
       ...(this.config?.calendars || []).map((x) => x.entity)].filter(Boolean);
     const sig = JSON.stringify(ids.map((id) => [id, hass.states?.[id]?.state,
       hass.states?.[id]?.last_changed, hass.states?.[id]?.attributes?.message,
@@ -815,7 +815,7 @@ class HaHomeSummaryCard extends HTMLElement {
         header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}h2{font-size:20px;margin:0;display:flex;align-items:center;gap:9px}h2 ha-icon{color:var(--dashboard-accent,#38bdf8)}.health{font-size:12px;font-weight:800;padding:6px 10px;border-radius:99px;background:color-mix(in srgb,var(--success-color,#20e3a2) 14%,transparent);color:var(--success-color,#20e3a2)}
         .utilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:13px}.utility{--accent:var(--success-color,#20e3a2);position:relative;isolation:isolate;min-width:0;padding:13px 13px 12px 15px;border:0;border-left:3px solid var(--accent);border-radius:16px;background:var(--surface,var(--ha-card-background,var(--card-background-color,#171b22)));box-shadow:var(--dashboard-shadow-strong,var(--ha-card-box-shadow,0 8px 22px rgba(0,0,0,.18)));overflow:hidden}.utility>*:not(.utility-bg){position:relative;z-index:1}.utility-head{display:flex;align-items:center;gap:7px;color:var(--secondary-text-color,#a7b2c2);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.utility-head ha-icon{width:17px;height:17px;--mdc-icon-size:17px;color:var(--accent)}.utility-bg{position:absolute;right:-13px;bottom:-17px;z-index:0;width:76px;height:76px;--mdc-icon-size:76px;color:var(--accent);opacity:.11;transform:rotate(-7deg);pointer-events:none}.use{display:flex;align-items:baseline;gap:4px;margin-top:7px}.use b{font-size:22px;line-height:1}.use span{font-size:10px;color:var(--secondary-text-color,#a7b2c2)}.cost{margin-top:7px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--primary-text-color,#fff) 9%,transparent);font-size:11px;color:var(--secondary-text-color,#a7b2c2)}.cost b{float:right;color:var(--primary-text-color,#fff);font-size:13px}.cost small{font-size:9px}
         .body{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(205px,.58fr);flex:1;min-height:0;gap:12px}.panel{padding:13px;border-radius:16px;background:color-mix(in srgb,var(--black,#000) 13%,transparent);border:1px solid color-mix(in srgb,var(--primary-text-color,#fff) 8%,transparent)}.panel h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px;color:var(--secondary-text-color,#a7b2c2)}
-        .rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));grid-auto-rows:minmax(48px,1fr);gap:7px;height:calc(100% - 22px)}.room{--room-accent:var(--success-color,#20e3a2);position:relative;display:grid;grid-template-columns:31px minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;column-gap:7px;min-width:0;padding:7px 8px;border:0;border-left:3px solid var(--room-accent);border-radius:12px;background:linear-gradient(135deg,color-mix(in srgb,var(--room-accent) 8%,transparent),color-mix(in srgb,var(--primary-text-color,#fff) 3%,transparent))}.room.warm{--room-accent:var(--orange,#fb923c)}.room.cold{--room-accent:var(--info-color,#38bdf8)}.room.unavailable{--room-accent:var(--error-color,#ef4444)}.room-icon{grid-row:1/3;display:grid;place-items:center;width:31px;height:31px;border-radius:10px;background:color-mix(in srgb,var(--room-accent) 15%,transparent);color:var(--room-accent)}.room-icon ha-icon{width:17px;height:17px;--mdc-icon-size:17px}.room-name{grid-column:2/4;min-width:0;font-size:10px;font-weight:800;line-height:1.1;white-space:nowrap}.room-temp{grid-row:2;grid-column:3;font-size:16px;font-weight:900}.room-target{grid-row:2;grid-column:2;font-size:8px;color:var(--secondary-text-color,#a7b2c2);white-space:nowrap}.room-target b{color:var(--room-accent)}
+        .rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));grid-auto-rows:minmax(48px,1fr);gap:7px;height:calc(100% - 22px)}.room{--room-accent:var(--success-color,#20e3a2);position:relative;isolation:isolate;display:grid;grid-template-columns:26px minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;column-gap:5px;min-width:0;padding:7px 8px;border:0;border-left:3px solid var(--room-accent);border-radius:12px;background:var(--surface,var(--ha-card-background,var(--card-background-color,#171b22)));box-shadow:var(--dashboard-shadow-strong,var(--ha-card-box-shadow,0 6px 16px rgba(0,0,0,.15)));overflow:hidden}.room>*:not(.room-bg){position:relative;z-index:1}.room.warm{--room-accent:var(--orange,#fb923c)}.room.cold{--room-accent:var(--info-color,#38bdf8)}.room.unavailable{--room-accent:var(--error-color,#ef4444)}.room-icon{grid-row:1/3;display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:color-mix(in srgb,var(--room-accent) 15%,transparent);color:var(--room-accent)}.room-icon ha-icon{width:15px;height:15px;--mdc-icon-size:15px}.room-bg{position:absolute;right:-9px;bottom:-12px;z-index:0;width:55px;height:55px;--mdc-icon-size:55px;color:var(--room-accent);opacity:.09;transform:rotate(-7deg);pointer-events:none}.room-name{grid-column:2/4;min-width:0;padding-right:24px;font-size:10px;font-weight:800;line-height:1.1;white-space:nowrap}.room-temp{grid-row:2;grid-column:3;font-size:16px;font-weight:900}.room-target{grid-row:2;grid-column:2;font-size:8px;color:var(--secondary-text-color,#a7b2c2);white-space:nowrap}.room-target b{color:var(--room-accent)}
         .agenda-panel{display:flex;flex-direction:column;min-height:0;overflow:hidden}.events{display:grid;flex:1 1 0;height:0;gap:3px;align-content:start;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:5px;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--dashboard-accent,#38bdf8) 55%,transparent) transparent}.events::-webkit-scrollbar{width:5px}.events::-webkit-scrollbar-thumb{border-radius:8px;background:color-mix(in srgb,var(--dashboard-accent,#38bdf8) 55%,transparent)}.event{display:grid;grid-template-columns:34px 3px minmax(0,1fr);gap:7px;align-items:center;min-width:0;padding:3px 0}.event>.date{display:grid;place-items:center;align-content:center;height:33px;border-radius:9px;background:color-mix(in srgb,var(--event) 13%,transparent);border:1px solid color-mix(in srgb,var(--event) 30%,transparent)}.date span{font-size:7px!important;text-transform:uppercase;color:var(--event)!important;font-weight:900}.date b{font-size:14px!important;line-height:14px}.event>i{display:block;align-self:stretch;border-radius:5px;background:var(--event)}.event-copy{min-width:0}.event-copy b,.event-copy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event-copy b{font-size:11px}.event-copy span,.empty{font-size:9px;color:var(--secondary-text-color,#a7b2c2);margin-top:1px}
         @media(max-width:700px){.utilities{grid-template-columns:1fr}.body{grid-template-columns:1fr}.card{padding:14px}}
       </style><ha-card class="card"><header><h2><ha-icon icon="mdi:home-analytics"></ha-icon><span class="title"></span></h2><span class="health"></span></header><div class="utilities"><section class="utility electricity"></section><section class="utility water"></section><section class="utility heat"></section></div><div class="body"><section class="panel"><h3>Temperaturer og setpunkter</h3><div class="rooms"></div></section><section class="panel agenda-panel"><h3>Næste i kalenderen</h3><div class="events"></div></section></div></ha-card>`;
@@ -837,10 +837,13 @@ class HaHomeSummaryCard extends HTMLElement {
     utility(".water","mdi:water","Vand",this._fmt(water,3),"m³",this._fmt(waterCost,0),Number.isFinite(water)&&Number.isFinite(waterCost));
     utility(".heat","mdi:radiator","Fjernvarme",this._fmt(heat,1),"kWh",this._fmt(heatCost,0),Number.isFinite(heat)&&Number.isFinite(heatCost));
     this.shadowRoot.querySelector(".rooms").innerHTML=(c.rooms||[]).map((room)=>{
-      const temp=this._num(room.temperature), target=Number(this._state(room.climate)?.attributes?.temperature);
+      const temp=this._num(room.temperature), humidity=this._num(room.humidity), target=Number(this._state(room.climate)?.attributes?.temperature);
       const delta=Number.isFinite(temp)&&Number.isFinite(target)?temp-target:Number.NaN;
       const tone=!Number.isFinite(temp)?"unavailable":delta>0.7?"warm":delta<-.7?"cold":"";
-      return `<div class="room ${tone}"><span class="room-icon"><ha-icon icon="${this._esc(room.icon||'mdi:thermometer')}"></ha-icon></span><span class="room-name">${this._esc(room.name)}</span><span class="room-target">${Number.isFinite(target)?`Mål <b>${this._fmt(target,1)}°</b>`:"Intet setpunkt"}</span><strong class="room-temp">${this._fmt(temp,1)}°</strong></div>`;
+      const icon=this._esc(room.icon||'mdi:thermometer');
+      const targetText=Number.isFinite(target)?`Mål <b>${this._fmt(target,1)}°</b>`:"";
+      const humidityText=Number.isFinite(humidity)?`<span class="room-humidity">${targetText?"· ":""}${this._fmt(humidity,0)}%</span>`:"";
+      return `<div class="room ${tone}"><ha-icon class="room-bg" icon="${icon}"></ha-icon><span class="room-icon"><ha-icon icon="${icon}"></ha-icon></span><span class="room-name">${this._esc(room.name)}</span><span class="room-target">${targetText||humidityText?`${targetText}${humidityText}`:"Intet setpunkt"}</span><strong class="room-temp">${this._fmt(temp,1)}°</strong></div>`;
     }).join("");
     this._renderEvents();
   }
