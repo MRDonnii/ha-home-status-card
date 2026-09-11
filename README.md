@@ -23,7 +23,8 @@ for layoutkortet med deres egen screen visibility.
 
 Rumfliserne reserverer mindst 160 px pr. flise og bruger en separat fuldbredde
 til rumnavnet. Lange navne som Soveværelse og Badeværelse afkortes derfor ikke
-af temperaturfeltet.
+af temperaturfeltet. Temperatur, setpunkt og fugtværdi bruger en større,
+kontraststærk typografi, men uden at øge flisernes højde.
 
 Layoutkortet måler selv sin placering og browserens aktuelle højde. Med
 `bottom_gap` reserveres den ønskede afstand over navbaren (110 px som
