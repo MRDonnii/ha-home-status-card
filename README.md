@@ -30,6 +30,10 @@ Layoutkortet måler selv sin placering og browserens aktuelle højde. Med
 standard), og højden genberegnes ved enhver ændring af vinduesstørrelsen.
 Naturligt indhold kan stadig gøre layoutet højere.
 
+På korte PC-viewports (højst 950 CSS-pixels) komprimeres statusrækkerne
+automatisk. Den frigivne højde tilfalder det sidste grow-kort, typisk grafen;
+mobilvisningen og høje PC-viewports er uændrede.
+
 Kalenderdelen viser som standard op til 40 hændelser fra de næste 14 dage i en
 selvstændig scrollbar. `event_days` og `max_events` kan ændres i GUI-editoren,
 uden at kortets eller PC-layoutets samlede højde vokser.
