@@ -1,4 +1,4 @@
-const VERSION = "0.5.0";
+const VERSION = "0.5.1";
 
 const PRESETS = {
   home_energy: {
@@ -738,16 +738,16 @@ class HaHomeSummaryCard extends HTMLElement {
   _esc(value) { return String(value ?? "").replace(/[&<>"']/g, (m) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[m]); }
   _label(value) { return String(value || "—").replaceAll("_", " ").replace(/\b\w/g, (x) => x.toUpperCase()); }
   async _loadEvents() {
-    if (!this._hass?.callWS || this._loadingEvents) return;
+    if (!this._hass?.callApi || this._loadingEvents) return;
     const calendars = this.config.calendars || [];
     const key = JSON.stringify(calendars.map((x) => x.entity));
     if (key === this._eventsKey && Date.now() - (this._eventsAt || 0) < 300000) return;
     this._loadingEvents = true;
     try {
       const start = new Date(); const end = new Date(start.getTime() + 7 * 86400000);
-      const data = await this._hass.callWS({ type: "calendar/get_events", start_time: start.toISOString(), end_time: end.toISOString(), entity_ids: calendars.map((x) => x.entity) });
       const events = [];
-      calendars.forEach((cal) => (data?.[cal.entity]?.events || []).forEach((event) => events.push({ ...event, calendar: cal })));
+      const lists = await Promise.all(calendars.map((cal) => this._hass.callApi("GET", `calendars/${encodeURIComponent(cal.entity)}?start=${encodeURIComponent(start.toISOString())}&end=${encodeURIComponent(end.toISOString())}`)));
+      calendars.forEach((cal, index) => (lists[index] || []).forEach((event) => events.push({ ...event, calendar: cal })));
       this._events = events.sort((a,b) => new Date(a.start?.dateTime || a.start?.date) - new Date(b.start?.dateTime || b.start?.date)).slice(0, 6);
       this._eventsKey = key; this._eventsAt = Date.now(); this._renderEvents();
     } catch (_) { this._events = this._fallbackEvents(); this._renderEvents(); }

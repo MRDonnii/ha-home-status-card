@@ -1,6 +1,6 @@
 # Handover
 
-- Version 0.5.0 tilføjer `custom:ha-home-summary-card`, som kun bruges under
+- Version 0.5.1 tilføjer `custom:ha-home-summary-card`, som kun bruges under
   de bevægelsesstyrede kameraer på PC-forsiden. Kortet viser supplerende data,
   der ikke allerede findes i forsidens højrekolonne: månedens el, dagens vand
   og fjernvarme, vandpris/flow, CO2/luftkvalitet, Protect-drift og kommende
@@ -8,7 +8,9 @@
 - Kortet opretter sin faste DOM én gang, opdaterer eksisterende felter ved
   relevante entity-skift og genopbygger kun hændelseslisten, når selve
   kalenderresultatet ændres. Kalenderen hentes højst hvert femte minut.
-- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.5.0`.
+- Kalenderen bruger HA's verificerede REST-kalenderendpoint, da denne HA-version
+  ikke tilbyder kalenderhentning som WebSocket-kommando.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.5.1`.
 - Dashboard-backup før installation:
   `/mnt/ha-config/_archive/backups/lovelace/home-summary-card-20260911-181500`.
 
