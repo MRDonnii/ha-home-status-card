@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8"><title>Desktop viewport fit smoke test</title>
+<script>
+customElements.define("ha-card",class extends HTMLElement{});
+customElements.define("mock-card",class extends HTMLElement{setConfig(config){this.config=config;}});
+window.loadCardHelpers=async()=>({createCardElement(config){const card=document.createElement("mock-card");card.setConfig(config);return card;}});
+</script>
+<script src="../ha-home-status-grid-card.js"></script>
+<body></body>
+<script>
+const card=document.createElement("ha-home-desktop-layout-card");
+card.setConfig({bottom_gap:110,left_cards:[{type:"mock-card"},{type:"mock-card"}],right_cards:[{type:"mock-card"}]});
+document.body.append(card);
+setTimeout(()=>{
+  const layout=card.shadowRoot.querySelector(".layout"),height=layout.style.getPropertyValue("--desktop-height");
+  if(!height.endsWith("px")||parseFloat(height)<=0)throw Error("desktop height was not calculated");
+  if(getComputedStyle(layout).overflow!=="hidden")throw Error("desktop layout can escape viewport");
+  if(getComputedStyle(card.shadowRoot.querySelector(".slot.grow")).minHeight!=="0px")throw Error("grow slot cannot shrink");
+  document.documentElement.dataset.test="pass";
+},100);
+</script>

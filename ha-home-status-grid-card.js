@@ -1,4 +1,4 @@
-const VERSION = "0.8.11";
+const VERSION = "0.8.12";
 
 const PRESETS = {
   home_energy: {
@@ -819,6 +819,7 @@ class HaHomeSummaryCard extends HTMLElement {
         @keyframes summaryIconDrift{50%{transform:translate(-4px,-3px) scale(1.04) rotate(-11deg);opacity:.22}}
         @media(prefers-reduced-motion:reduce){.utility-bg,.room-bg{animation:none}}
         .agenda-panel{display:flex;flex-direction:column;min-height:0;overflow:hidden}.events{display:grid;flex:1 1 0;height:0;gap:3px;align-content:start;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:5px;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--dashboard-accent,#38bdf8) 55%,transparent) transparent}.events::-webkit-scrollbar{width:5px}.events::-webkit-scrollbar-thumb{border-radius:8px;background:color-mix(in srgb,var(--dashboard-accent,#38bdf8) 55%,transparent)}.event{display:grid;grid-template-columns:34px 3px minmax(0,1fr);gap:7px;align-items:center;min-width:0;padding:3px 0}.event>.date{display:grid;place-items:center;align-content:center;height:33px;border-radius:9px;background:color-mix(in srgb,var(--event) 13%,transparent);border:1px solid color-mix(in srgb,var(--event) 30%,transparent)}.date span{font-size:7px!important;text-transform:uppercase;color:var(--event)!important;font-weight:900}.date b{font-size:14px!important;line-height:14px}.event>i{display:block;align-self:stretch;border-radius:5px;background:var(--event)}.event-copy{min-width:0}.event-copy b,.event-copy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event-copy b{font-size:11px}.event-copy span,.empty{font-size:9px;color:var(--secondary-text-color,#a7b2c2);margin-top:1px}
+        @media(min-width:1101px) and (max-height:950px){header{margin-bottom:9px}.utilities{margin-bottom:9px;gap:8px}.utility{padding-top:10px;padding-bottom:9px}.use{margin-top:5px}.cost{margin-top:5px;padding-top:5px}.body{grid-template-columns:minmax(0,1.7fr) minmax(180px,.55fr);gap:9px}.panel{padding:10px}.panel h3{margin-bottom:7px}.rooms{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(42px,1fr);gap:5px;height:calc(100% - 19px)}.room{padding:5px 7px}.event{padding:2px 0}}
         @media(max-width:700px){.utilities{grid-template-columns:1fr}.body{grid-template-columns:1fr}.card{padding:14px}}
       </style><ha-card class="card"><header><h2><ha-icon icon="mdi:home-analytics"></ha-icon><span class="title"></span></h2><span class="health"></span></header><div class="utilities"><section class="utility electricity"></section><section class="utility water"></section><section class="utility heat"></section></div><div class="body"><section class="panel"><h3>Temperaturer og setpunkter</h3><div class="rooms"></div></section><section class="panel agenda-panel"><h3>Næste i kalenderen</h3><div class="events"></div></section></div></ha-card>`;
       this._rendered = true;
@@ -866,8 +867,8 @@ class HaHomeSummaryCardEditor extends HTMLElement {
 
 class HaHomeDesktopLayoutCard extends HTMLElement {
   constructor(){super();this.attachShadow({mode:"open"});this._children=[];this._resize=()=>requestAnimationFrame(()=>this._fitViewport());}
-  connectedCallback(){window.addEventListener("resize",this._resize);this._resize();}
-  disconnectedCallback(){window.removeEventListener("resize",this._resize);}
+  connectedCallback(){window.addEventListener("resize",this._resize);window.visualViewport?.addEventListener("resize",this._resize);this._resize();}
+  disconnectedCallback(){window.removeEventListener("resize",this._resize);window.visualViewport?.removeEventListener("resize",this._resize);}
   setConfig(config){
     if(!Array.isArray(config.left_cards)||!Array.isArray(config.right_cards)) throw new Error("Angiv left_cards og right_cards");
     this.config=structuredClone(config);this._build();
@@ -876,14 +877,14 @@ class HaHomeDesktopLayoutCard extends HTMLElement {
   async _build(){
     const token={};this._buildToken=token;
     const helpers=await window.loadCardHelpers();if(this._buildToken!==token)return;
-    this.shadowRoot.innerHTML=`<style>:host{display:block}.layout{display:grid;grid-template-columns:var(--desktop-columns,minmax(0,.9fr) minmax(440px,1.1fr));align-items:stretch;min-height:var(--desktop-min-height,auto);gap:var(--desktop-gap,clamp(10px,.75vw,18px))}.column{display:flex;flex-direction:column;min-width:0;gap:var(--desktop-gap,clamp(10px,.75vw,18px))}.slot{min-width:0}.slot.grow{display:flex;flex:1;min-height:0}.slot.grow>*{flex:1;min-width:0;min-height:0}@media(max-width:1399px){.layout{grid-template-columns:minmax(0,1fr) minmax(420px,1fr)}} </style><div class="layout"><div class="column left"></div><div class="column right"></div></div>`;
+    this.shadowRoot.innerHTML=`<style>:host{display:block}.layout{display:grid;grid-template-columns:var(--desktop-columns,minmax(0,.9fr) minmax(440px,1.1fr));align-items:stretch;height:var(--desktop-height,auto);min-height:0;overflow:hidden;gap:var(--desktop-gap,clamp(10px,.75vw,18px))}.column{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;gap:var(--desktop-gap,clamp(10px,.75vw,18px))}.slot{min-width:0;flex:0 0 auto}.slot.grow{display:flex;flex:1 1 0;min-height:0;overflow:hidden}.slot.grow>*{flex:1;min-width:0;min-height:0}@media(max-width:1399px){.layout{grid-template-columns:minmax(0,1fr) minmax(420px,1fr)}} </style><div class="layout"><div class="column left"></div><div class="column right"></div></div>`;
     const make=(cfg,parent,index,total)=>{const card=helpers.createCardElement(cfg);const slot=document.createElement("div");slot.className=`slot${index===total-1?" grow":""}`;slot.append(card);parent.append(slot);this._children.push(card);if(this._hass)card.hass=this._hass;};
     this._children=[];const left=this.shadowRoot.querySelector(".left"),right=this.shadowRoot.querySelector(".right");
     this.config.left_cards.forEach((cfg,i)=>make(cfg,left,i,this.config.left_cards.length));
     this.config.right_cards.forEach((cfg,i)=>make(cfg,right,i,this.config.right_cards.length));
     const layout=this.shadowRoot.querySelector(".layout");layout.style.setProperty("--desktop-columns",this.config.columns||"minmax(0,.9fr) minmax(440px,1.1fr)");layout.style.setProperty("--desktop-gap",this.config.gap||"clamp(10px,.75vw,18px)");this._fitViewport();
   }
-  _fitViewport(){const layout=this.shadowRoot?.querySelector(".layout");if(!layout||!window.matchMedia("(min-width:1101px)").matches)return;const top=this.getBoundingClientRect().top;const bottomGap=Math.max(90,Number(this.config?.bottom_gap)||110);layout.style.minHeight=`${Math.max(0,window.innerHeight-top-bottomGap)}px`;}
+  _fitViewport(){const layout=this.shadowRoot?.querySelector(".layout");if(!layout||!window.matchMedia("(min-width:1101px)").matches)return;const top=this.getBoundingClientRect().top;const viewportHeight=window.visualViewport?.height||window.innerHeight;const bottomGap=Math.max(90,Number(this.config?.bottom_gap)||110);layout.style.setProperty("--desktop-height",`${Math.max(0,viewportHeight-top-bottomGap)}px`);}
   getCardSize(){return 12;}
   static getConfigElement(){return document.createElement("ha-home-desktop-layout-card-editor");}
   static getStubConfig(){return{columns:"minmax(0,.9fr) minmax(440px,1.1fr)",gap:"clamp(10px,.75vw,18px)",bottom_gap:110,left_cards:[],right_cards:[]};}

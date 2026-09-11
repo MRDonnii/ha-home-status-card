@@ -1,5 +1,13 @@
 # Handover
 
+- Version 0.8.12 retter PC-layout ved 100 % browserzoom og lavere skærmhøjde.
+  Desktop-wrapperen bruger nu en eksakt højde ud fra den aktuelle visuelle
+  viewport, kortets faktiske top og `bottom_gap`, så indholdet ikke kan vokse
+  bag navbaren. Ved højst 950 CSS-pixels i højden bliver husoverblikket
+  kompaktere, og de 12 rum vises i tre kolonner. Mobilreglerne er uændrede.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.12`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-desktop-zoom-fit-20260911-182000`.
+
 - Version 0.8.11 fjerner den visuelle yder-container omkring `Husets
   overblik`: ingen baggrund, skygge, radius, kant eller indvendig padding.
   Overskrift og underkort ligger nu frit i kolonnen, mens de enkelte fliser og
