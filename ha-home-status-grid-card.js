@@ -1,4 +1,4 @@
-const VERSION = "0.4.6";
+const VERSION = "0.4.7";
 
 const PRESETS = {
   home_energy: {
@@ -31,6 +31,8 @@ const PRESETS = {
     phase_max_entity: "sensor.th_charger_allocated_charge_current",
     phase_max: 16,
     daily_entity: "sensor.tesla_daglig_ladning",
+    schedule_entity: "sensor.monta_th_bil_lader_last_charge",
+    charger_state_entity: "sensor.monta_th_bil_lader_state",
     navigation_path: "/teknik-overblik/ev-overblik",
     value_unit: "%",
   },
@@ -130,6 +132,7 @@ class HaHomeStatusCard extends HTMLElement {
       throw new Error("Vælg preset eller entity");
     this.config = { ...config };
     this._sig = "";
+    this._rendered = false;
     this.render();
   }
 
@@ -142,6 +145,8 @@ class HaHomeStatusCard extends HTMLElement {
       cfg.power_entity,
       cfg.phase_max_entity,
       cfg.daily_entity,
+      cfg.schedule_entity,
+      cfg.charger_state_entity,
       cfg.fallback_daily_entity,
       cfg.status_entity,
       cfg.active_entity,
@@ -235,9 +240,16 @@ class HaHomeStatusCard extends HTMLElement {
       const battery = this.number(cfg.entity);
       value = `${this.fmt(battery, 0)}%`;
       const power = this.number(cfg.power_entity);
-      detail =
-        power > 0
-          ? `${this.fmt(power, 1)} kW lader`
+      const scheduleState = [
+        this.text(cfg.schedule_entity, ""),
+        this.text(cfg.charger_state_entity, ""),
+      ]
+        .join(" ")
+        .toLowerCase();
+      detail = power > 0
+        ? `${this.fmt(power, 1)} kW lader`
+        : scheduleState.includes("scheduled")
+          ? "Planlagt"
           : `${this.fmt(this.number(cfg.daily_entity), 1)} kWh`;
       meter = Math.ceil((battery || 0) / 20);
       if (battery < 20) color = "var(--error-color, #f43f5e)";
@@ -580,7 +592,8 @@ class HaHomeStatusCard extends HTMLElement {
     )
       .map((s) => `<i class="seg ${segClass(s)}"></i>`)
       .join("");
-    this.shadowRoot.innerHTML = `<style>
+    if (!this._rendered) {
+      this.shadowRoot.innerHTML = `<style>
       :host{display:block}
       .item{display:block;width:100%;min-width:0;max-width:100%;height:85px;box-sizing:border-box;position:relative;overflow:hidden;padding:10px 12px;border:0;border-left:3px solid color-mix(in srgb,var(--accent) 78%,transparent);border-radius:15px;background:var(--surface,var(--ha-card-background,var(--card-background-color,#172536)));box-shadow:var(--dashboard-shadow-strong, var(--ha-card-box-shadow, 0 8px 22px rgba(0,0,0,.22)));color:var(--gray800,var(--primary-text-color,#f8fafc));font:inherit;text-align:left;cursor:pointer}
       .value{position:relative;z-index:2;font-size:18px;font-weight:750;line-height:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meter{position:relative;z-index:2;display:flex;gap:4px;height:8px;margin:5px 0}.seg{width:14px;height:6px;border-radius:99px;background:color-mix(in srgb,var(--dashboard-icon-muted, var(--disabled-text-color, #64748b)) 25%,transparent)}.seg.on{background:var(--accent);box-shadow:0 0 7px color-mix(in srgb,var(--accent) 28%,transparent)}.seg.seg-locked{background:var(--state-on-icon, var(--success-color, #20e3a2));box-shadow:0 0 7px color-mix(in srgb,var(--state-on-icon, var(--success-color, #20e3a2)) 30%,transparent)}.seg.seg-unlocked{background:var(--warning-color,#f59e0b);box-shadow:0 0 7px color-mix(in srgb,var(--warning-color,#f59e0b) 30%,transparent)}.seg.seg-error{background:var(--error-color,#ef4444);animation:seg-error-pulse 1.8s ease-in-out infinite}@keyframes seg-error-pulse{0%,100%{opacity:.5;box-shadow:0 0 4px color-mix(in srgb,var(--error-color,#ef4444) 35%,transparent)}50%{opacity:1;box-shadow:0 0 11px color-mix(in srgb,var(--error-color,#ef4444) 75%,transparent)}}.item.has-error{animation:item-error-pulse 1.8s ease-in-out infinite}@keyframes item-error-pulse{0%,100%{box-shadow:var(--dashboard-shadow-strong, var(--ha-card-box-shadow, 0 8px 22px rgba(0,0,0,.22)))}50%{box-shadow:0 0 0 3px color-mix(in srgb,var(--error-color,#ef4444) 22%,transparent),var(--dashboard-shadow-strong, var(--ha-card-box-shadow, 0 8px 22px rgba(0,0,0,.22)))}}
@@ -591,10 +604,26 @@ class HaHomeStatusCard extends HTMLElement {
       .price-bars{position:absolute;inset:10px 42px 8px 12px;display:flex;align-items:flex-end;gap:5px;opacity:.42;z-index:0}.price-bars i{display:block;width:4px;border-radius:9px 9px 0 0;background:var(--accent);animation:barPulse 2.8s ease-in-out infinite}@keyframes barPulse{50%{transform:scaleY(.72);opacity:.6}}
       .appliances{position:absolute;right:8px;top:4px;display:flex;gap:3px;z-index:3}.appliances img{width:24px;height:24px;object-fit:contain}.airflow{position:absolute;right:10px;top:8px;z-index:3;color:var(--accent)}.airflow i{display:block;border-top:2px solid currentColor;border-radius:50%;height:4px;margin:1px 0;animation:air 1.9s ease-in-out infinite}.airflow i:nth-child(1){width:11px}.airflow i:nth-child(2){width:17px;animation-delay:-.3s}.airflow i:nth-child(3){width:23px;animation-delay:-.6s}@keyframes air{50%{transform:translateX(-3px);opacity:.45}}
       @media(max-width:600px){.item{padding:9px 9px}.value{font-size:16px}.detail,.label{font-size:10px}.meter{gap:3px}.seg{width:12px}}
-    </style><button class="item ${item.type}${item.hasError ? " has-error" : ""}" style="--accent:${item.color}" aria-label="${item.name || item.type}">${this.decoration(item)}<div class="value">${item.value}</div><div class="meter">${meterHtml}</div><div class="detail">${item.detail || "&nbsp;"}</div><div class="label">${item.label}</div><ha-icon class="bg-icon" icon="${item.icon || "mdi:information-outline"}"></ha-icon></button>`;
+    </style><button class="item"><span class="decoration"></span><div class="value"></div><div class="meter"></div><div class="detail"></div><div class="label"></div><ha-icon class="bg-icon"></ha-icon></button>`;
+      this.shadowRoot
+        .querySelector(".item")
+        .addEventListener("click", () => this.action(this._currentItem));
+      this._rendered = true;
+    }
+
+    this._currentItem = item;
+    const button = this.shadowRoot.querySelector(".item");
+    button.className = `item ${item.type}${item.hasError ? " has-error" : ""}`;
+    button.style.setProperty("--accent", item.color);
+    button.setAttribute("aria-label", item.name || item.type);
+    this.shadowRoot.querySelector(".decoration").innerHTML = this.decoration(item);
+    this.shadowRoot.querySelector(".value").textContent = item.value;
+    this.shadowRoot.querySelector(".meter").innerHTML = meterHtml;
+    this.shadowRoot.querySelector(".detail").textContent = item.detail || "\u00a0";
+    this.shadowRoot.querySelector(".label").innerHTML = item.label;
     this.shadowRoot
-      .querySelector(".item")
-      .addEventListener("click", () => this.action(item));
+      .querySelector(".bg-icon")
+      .setAttribute("icon", item.icon || "mdi:information-outline");
   }
 
   getCardSize() {

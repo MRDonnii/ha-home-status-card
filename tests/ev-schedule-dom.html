@@ -1,0 +1,37 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="../ha-home-status-grid-card.js"></script>
+<script>
+  addEventListener("DOMContentLoaded", () => {
+    const states = {
+      "sensor.energitte_battery": { state: "57", attributes: {} },
+      "sensor.th_charger_effekt_normaliseret_kw": { state: "0", attributes: {} },
+      "sensor.tesla_daglig_ladning": { state: "0", attributes: {} },
+      "sensor.monta_th_bil_lader_last_charge": { state: "scheduled", attributes: {} },
+      "sensor.monta_th_bil_lader_state": { state: "busy-scheduled", attributes: {} },
+      "sensor.th_charger_current_phase_1": { state: "0", attributes: {} },
+      "sensor.th_charger_current_phase_2": { state: "0", attributes: {} },
+      "sensor.th_charger_current_phase_3": { state: "0", attributes: {} },
+      "sensor.th_charger_allocated_charge_current": { state: "16", attributes: {} },
+    };
+    const card = document.createElement("ha-home-status-card");
+    card.setConfig({ preset: "ev" });
+    card.hass = { states };
+    document.body.append(card);
+    const originalButton = card.shadowRoot.querySelector(".item");
+    const planned = card.shadowRoot.querySelector(".detail").textContent;
+
+    card.hass = { states: { ...states, "sensor.unrelated": { state: "changed" } } };
+    const stableAfterIrrelevant = card.shadowRoot.querySelector(".item") === originalButton;
+
+    card.hass = {
+      states: {
+        ...states,
+        "sensor.th_charger_effekt_normaliseret_kw": { state: "7.4", attributes: {} },
+      },
+    };
+    const stableAfterRelevant = card.shadowRoot.querySelector(".item") === originalButton;
+    const charging = card.shadowRoot.querySelector(".detail").textContent;
+    document.title = JSON.stringify({ planned, charging, stableAfterIrrelevant, stableAfterRelevant });
+  });
+</script>

@@ -1,5 +1,17 @@
 # Handover
 
+- Version 0.4.7: Bilkortet følger igen Monta-ladeplanen via
+  `sensor.monta_th_bil_lader_last_charge` og
+  `sensor.monta_th_bil_lader_state`. Når bilen ikke lader og en af sensorerne
+  indeholder `scheduled`, vises `Planlagt`; reel ladeeffekt har altid prioritet.
+- 0.4.7 retter samtidig kortets state-rendering, så den eksisterende kortnode
+  genbruges ved almindelige `hass`-opdateringer. Isoleret Chrome-test dækker
+  planlagt status, aktiv opladning samt node-stabilitet ved relevante og
+  irrelevante stateændringer.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.4.7`.
+- Backup før installation:
+  `/mnt/ha-config/_archive/backups/lovelace/home-status-ev-schedule-20260911-153400`.
+
 - Version: 0.3.0
 - Formål: Én pakke med ét knapkort, der kan indsættes flere gange med en valgt specialfunktion.
 - Det eksisterende 4-kolonne-grid bevares; hver gammel knap erstattes af `custom:ha-home-status-card` med sit eget `preset`.
