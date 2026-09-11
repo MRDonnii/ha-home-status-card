@@ -16,6 +16,11 @@ type: custom:ha-home-summary-card
 title: Husstatus
 ```
 
+`custom:ha-home-desktop-layout-card` kan samle to PC-kolonner i samme
+stretch-layout. Kolonnerne får altid samme totalhøjde, og det sidste kort i den
+korteste kolonne udfylder automatisk resten. Mobilkort skal fortsat ligge uden
+for layoutkortet med deres egen screen visibility.
+
 Bilfunktionen viser `Planlagt`, når Monta melder en aktiv ladeplan via
 `schedule_entity` eller `charger_state_entity`. Ved aktiv opladning vises den
 aktuelle ladeeffekt i stedet. Entiteterne kan overskrives på kortet til andre

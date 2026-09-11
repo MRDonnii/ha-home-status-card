@@ -1,4 +1,4 @@
-const VERSION = "0.7.0";
+const VERSION = "0.8.0";
 
 const PRESETS = {
   home_energy: {
@@ -703,6 +703,12 @@ const SUMMARY_DEFAULTS = {
     { name: "Kontor", icon: "mdi:desk", temperature: "sensor.temp_fugtighed_kontor_temperature", climate: "climate.kontor" },
     { name: "Mads", icon: "mdi:bed-single-outline", temperature: "sensor.temp_fugtighed_mads_temperature", climate: "climate.mads" },
     { name: "Viggo", icon: "mdi:bed-single-outline", temperature: "sensor.temp_fugtighed_viggo_temperature", climate: "climate.viggo" },
+    { name: "Soveværelse", icon: "mdi:bed-king-outline", temperature: "sensor.luftkvalitet_sovevaerelse_temperature" },
+    { name: "Badeværelse", icon: "mdi:shower", temperature: "sensor.temp_fugtighed_badevaerelse_temperature" },
+    { name: "Bryggers", icon: "mdi:washing-machine", temperature: "sensor.temp_fugtighed_bryggers_temperature" },
+    { name: "Lille WC", icon: "mdi:toilet", temperature: "sensor.temp_fugtighed_lille_wc_temperature" },
+    { name: "Garage", icon: "mdi:garage-variant", temperature: "sensor.temp_fugtighed_garage_temperature", climate: "climate.garagen" },
+    { name: "Loft", icon: "mdi:home-roof", temperature: "sensor.temp_fugtighed_loftet_temperature" },
   ],
   calendars: [
     { entity: "calendar.th_faelles", name: "Fælles", color: "var(--orange, #fb923c)" },
@@ -801,11 +807,11 @@ class HaHomeSummaryCard extends HTMLElement {
     if (!this.config) return;
     if (!this._rendered) {
       this.shadowRoot.innerHTML = `<style>
-        :host{display:block}.card{position:relative;overflow:hidden;padding:18px;border-radius:22px;background:linear-gradient(145deg,color-mix(in srgb,var(--white,#fff) 5%,transparent),transparent 42%),var(--ha-card-background,var(--surface,#15191f));border:1px solid color-mix(in srgb,var(--dashboard-accent,#38bdf8) 32%,transparent);box-shadow:0 12px 28px color-mix(in srgb,var(--black,#000) 22%,transparent);color:var(--primary-text-color,#fff)}
+        :host{display:block;height:100%}.card{box-sizing:border-box;display:flex;flex-direction:column;height:100%;position:relative;overflow:hidden;padding:18px;border-radius:22px;background:linear-gradient(145deg,color-mix(in srgb,var(--white,#fff) 5%,transparent),transparent 42%),var(--ha-card-background,var(--surface,#15191f));border:1px solid color-mix(in srgb,var(--dashboard-accent,#38bdf8) 32%,transparent);box-shadow:0 12px 28px color-mix(in srgb,var(--black,#000) 22%,transparent);color:var(--primary-text-color,#fff)}
         header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}h2{font-size:20px;margin:0;display:flex;align-items:center;gap:9px}h2 ha-icon{color:var(--dashboard-accent,#38bdf8)}.health{font-size:12px;font-weight:800;padding:6px 10px;border-radius:99px;background:color-mix(in srgb,var(--success-color,#20e3a2) 14%,transparent);color:var(--success-color,#20e3a2)}
         .utilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:13px}.utility{position:relative;min-width:0;padding:13px 13px 12px 15px;border-radius:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 12%,transparent),color-mix(in srgb,var(--black,#000) 12%,transparent));border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);overflow:hidden}.utility:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--accent)}.utility-head{display:flex;align-items:center;gap:7px;color:var(--secondary-text-color,#a7b2c2);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.utility-head ha-icon{width:17px;height:17px;--mdc-icon-size:17px;color:var(--accent)}.use{display:flex;align-items:baseline;gap:4px;margin-top:7px}.use b{font-size:22px;line-height:1}.use span{font-size:10px;color:var(--secondary-text-color,#a7b2c2)}.cost{margin-top:7px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--accent) 22%,transparent);font-size:11px;color:var(--secondary-text-color,#a7b2c2)}.cost b{float:right;color:var(--primary-text-color,#fff);font-size:13px}.cost small{font-size:9px}
-        .body{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(210px,.72fr);gap:12px}.panel{padding:13px;border-radius:16px;background:color-mix(in srgb,var(--black,#000) 13%,transparent);border:1px solid color-mix(in srgb,var(--primary-text-color,#fff) 8%,transparent)}.panel h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px;color:var(--secondary-text-color,#a7b2c2)}
-        .rooms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,1fr);gap:7px;height:calc(100% - 22px)}.room{--room-accent:var(--success-color,#20e3a2);position:relative;display:grid;grid-template-columns:34px minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;column-gap:9px;min-width:0;padding:9px 10px;border-radius:12px;background:linear-gradient(135deg,color-mix(in srgb,var(--room-accent) 10%,transparent),color-mix(in srgb,var(--primary-text-color,#fff) 3%,transparent));border:1px solid color-mix(in srgb,var(--room-accent) 24%,transparent)}.room.warm{--room-accent:var(--orange,#fb923c)}.room.cold{--room-accent:var(--info-color,#38bdf8)}.room-icon{grid-row:1/3;display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:color-mix(in srgb,var(--room-accent) 15%,transparent);color:var(--room-accent)}.room-icon ha-icon{width:19px;height:19px;--mdc-icon-size:19px}.room-name{min-width:0;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.room-temp{grid-row:1/3;grid-column:3;font-size:18px;font-weight:900}.room-target{font-size:9px;color:var(--secondary-text-color,#a7b2c2)}.room-target b{color:var(--room-accent)}
+        .body{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(205px,.58fr);flex:1;min-height:0;gap:12px}.panel{padding:13px;border-radius:16px;background:color-mix(in srgb,var(--black,#000) 13%,transparent);border:1px solid color-mix(in srgb,var(--primary-text-color,#fff) 8%,transparent)}.panel h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px;color:var(--secondary-text-color,#a7b2c2)}
+        .rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));grid-auto-rows:minmax(48px,1fr);gap:7px;height:calc(100% - 22px)}.room{--room-accent:var(--success-color,#20e3a2);position:relative;display:grid;grid-template-columns:31px minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;column-gap:7px;min-width:0;padding:7px 8px;border-radius:12px;background:linear-gradient(135deg,color-mix(in srgb,var(--room-accent) 10%,transparent),color-mix(in srgb,var(--primary-text-color,#fff) 3%,transparent));border:1px solid color-mix(in srgb,var(--room-accent) 24%,transparent)}.room.warm{--room-accent:var(--orange,#fb923c)}.room.cold{--room-accent:var(--info-color,#38bdf8)}.room-icon{grid-row:1/3;display:grid;place-items:center;width:31px;height:31px;border-radius:10px;background:color-mix(in srgb,var(--room-accent) 15%,transparent);color:var(--room-accent)}.room-icon ha-icon{width:17px;height:17px;--mdc-icon-size:17px}.room-name{min-width:0;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.room-temp{grid-row:1/3;grid-column:3;font-size:16px;font-weight:900}.room-target{font-size:8px;color:var(--secondary-text-color,#a7b2c2);white-space:nowrap}.room-target b{color:var(--room-accent)}
         .events{display:grid;gap:3px;align-content:start}.event{display:grid;grid-template-columns:34px 3px minmax(0,1fr);gap:7px;align-items:center;min-width:0;padding:3px 0}.event>.date{display:grid;place-items:center;align-content:center;height:33px;border-radius:9px;background:color-mix(in srgb,var(--event) 13%,transparent);border:1px solid color-mix(in srgb,var(--event) 30%,transparent)}.date span{font-size:7px!important;text-transform:uppercase;color:var(--event)!important;font-weight:900}.date b{font-size:14px!important;line-height:14px}.event>i{display:block;align-self:stretch;border-radius:5px;background:var(--event)}.event-copy{min-width:0}.event-copy b,.event-copy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event-copy b{font-size:11px}.event-copy span,.empty{font-size:9px;color:var(--secondary-text-color,#a7b2c2);margin-top:1px}
         @media(max-width:700px){.utilities{grid-template-columns:1fr}.body{grid-template-columns:1fr}.card{padding:14px}}
       </style><ha-card class="card"><header><h2><ha-icon icon="mdi:home-analytics"></ha-icon><span class="title"></span></h2><span class="health"></span></header><div class="utilities"><section class="utility electricity" style="--accent:var(--dashboard-accent,#38bdf8)"></section><section class="utility water" style="--accent:var(--info-color,#22aee8)"></section><section class="utility heat" style="--accent:var(--orange,#fb923c)"></section></div><div class="body"><section class="panel"><h3>Temperaturer og setpunkter</h3><div class="rooms"></div></section><section class="panel"><h3>Næste i kalenderen</h3><div class="events"></div></section></div></ha-card>`;
@@ -829,7 +835,7 @@ class HaHomeSummaryCard extends HTMLElement {
       const temp=this._num(room.temperature), target=Number(this._state(room.climate)?.attributes?.temperature);
       const delta=Number.isFinite(temp)&&Number.isFinite(target)?temp-target:Number.NaN;
       const tone=delta>0.7?"warm":delta<-.7?"cold":"";
-      return `<div class="room ${tone}"><span class="room-icon"><ha-icon icon="${this._esc(room.icon||'mdi:thermometer')}"></ha-icon></span><span class="room-name">${this._esc(room.name)}</span><span class="room-target">Mål <b>${this._fmt(target,1)}°</b></span><strong class="room-temp">${this._fmt(temp,1)}°</strong></div>`;
+      return `<div class="room ${tone}"><span class="room-icon"><ha-icon icon="${this._esc(room.icon||'mdi:thermometer')}"></ha-icon></span><span class="room-name">${this._esc(room.name)}</span><span class="room-target">${Number.isFinite(target)?`Mål <b>${this._fmt(target,1)}°</b>`:"Intet setpunkt"}</span><strong class="room-temp">${this._fmt(temp,1)}°</strong></div>`;
     }).join("");
     this._renderEvents();
   }
@@ -847,8 +853,37 @@ class HaHomeSummaryCardEditor extends HTMLElement {
     this.querySelectorAll("input").forEach((input)=>input.addEventListener("change",()=>this.dispatchEvent(new CustomEvent("config-changed",{bubbles:true,composed:true,detail:{config:{...this.config,[input.dataset.key]:input.value}}}))));
   }
 }
+
+class HaHomeDesktopLayoutCard extends HTMLElement {
+  constructor(){super();this.attachShadow({mode:"open"});this._children=[];}
+  setConfig(config){
+    if(!Array.isArray(config.left_cards)||!Array.isArray(config.right_cards)) throw new Error("Angiv left_cards og right_cards");
+    this.config=structuredClone(config);this._build();
+  }
+  set hass(hass){this._hass=hass;this._children.forEach((card)=>card.hass=hass);}
+  async _build(){
+    const token={};this._buildToken=token;
+    const helpers=await window.loadCardHelpers();if(this._buildToken!==token)return;
+    this.shadowRoot.innerHTML=`<style>:host{display:block}.layout{display:grid;grid-template-columns:var(--desktop-columns,minmax(0,.9fr) minmax(440px,1.1fr));align-items:stretch;gap:var(--desktop-gap,clamp(10px,.75vw,18px))}.column{display:flex;flex-direction:column;min-width:0;gap:var(--desktop-gap,clamp(10px,.75vw,18px))}.slot{min-width:0}.slot.grow{display:flex;flex:1;min-height:0}.slot.grow>*{flex:1;min-width:0;min-height:0}@media(max-width:1399px){.layout{grid-template-columns:minmax(0,1fr) minmax(420px,1fr)}} </style><div class="layout"><div class="column left"></div><div class="column right"></div></div>`;
+    const make=(cfg,parent,index,total)=>{const card=helpers.createCardElement(cfg);const slot=document.createElement("div");slot.className=`slot${index===total-1?" grow":""}`;slot.append(card);parent.append(slot);this._children.push(card);if(this._hass)card.hass=this._hass;};
+    this._children=[];const left=this.shadowRoot.querySelector(".left"),right=this.shadowRoot.querySelector(".right");
+    this.config.left_cards.forEach((cfg,i)=>make(cfg,left,i,this.config.left_cards.length));
+    this.config.right_cards.forEach((cfg,i)=>make(cfg,right,i,this.config.right_cards.length));
+    const layout=this.shadowRoot.querySelector(".layout");layout.style.setProperty("--desktop-columns",this.config.columns||"minmax(0,.9fr) minmax(440px,1.1fr)");layout.style.setProperty("--desktop-gap",this.config.gap||"clamp(10px,.75vw,18px)");
+  }
+  getCardSize(){return 12;}
+  static getConfigElement(){return document.createElement("ha-home-desktop-layout-card-editor");}
+  static getStubConfig(){return{columns:"minmax(0,.9fr) minmax(440px,1.1fr)",gap:"clamp(10px,.75vw,18px)",left_cards:[],right_cards:[]};}
+}
+class HaHomeDesktopLayoutCardEditor extends HTMLElement {
+  setConfig(config){this.config=structuredClone(config);this.render();}
+  set hass(hass){this._hass=hass;}
+  render(){this.innerHTML=`<style>label{display:block;margin:10px 0 4px;font-weight:600}input{box-sizing:border-box;width:100%;padding:10px}</style><label>PC-kolonner</label><input data-key="columns" value="${this.config.columns||''}"><label>Responsiv afstand</label><input data-key="gap" value="${this.config.gap||''}">`;this.querySelectorAll("input").forEach((input)=>input.addEventListener("change",()=>this.dispatchEvent(new CustomEvent("config-changed",{bubbles:true,composed:true,detail:{config:{...this.config,[input.dataset.key]:input.value}}}))));}
+}
 if (!customElements.get("ha-home-summary-card")) customElements.define("ha-home-summary-card",HaHomeSummaryCard);
 if (!customElements.get("ha-home-summary-card-editor")) customElements.define("ha-home-summary-card-editor",HaHomeSummaryCardEditor);
+if (!customElements.get("ha-home-desktop-layout-card")) customElements.define("ha-home-desktop-layout-card",HaHomeDesktopLayoutCard);
+if (!customElements.get("ha-home-desktop-layout-card-editor")) customElements.define("ha-home-desktop-layout-card-editor",HaHomeDesktopLayoutCardEditor);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-home-status-card",
@@ -857,6 +892,7 @@ window.customCards.push({
   preview: true,
 });
 window.customCards.push({ type:"ha-home-summary-card", name:"HA Home Summary Card", description:"Samlet husstatus, forbrug, kalender og kameraoverblik", preview:true });
+window.customCards.push({ type:"ha-home-desktop-layout-card", name:"HA Home Desktop Layout", description:"Balancerede responsive kolonner til PC-forsiden", preview:false });
 console.info(
   `%c HA-HOME-STATUS-GRID-CARD %c ${VERSION} `,
   "color:#fff;background:#38bdf8;font-weight:700",

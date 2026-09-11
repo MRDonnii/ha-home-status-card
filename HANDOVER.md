@@ -1,5 +1,15 @@
 # Handover
 
+- Version 0.8.0 tilføjer `custom:ha-home-desktop-layout-card`: et PC-only
+  stretch-layout med to fælles kolonner. Sidste kort i hver kolonne udfylder
+  automatisk resthøjden, så kolonnerne altid får samme bundlinje uden faste
+  pixeljusteringer. Kortet har GUI-felter til kolonner og responsivt gap.
+- Husoverblikket viser nu 12 temperaturzoner: Stue, Spisestue, Køkken,
+  Kontor, Mads, Viggo, Soveværelse, Badeværelse, Bryggers, Lille WC, Garage og
+  Loft. Zoner uden climate-entity viser `Intet setpunkt`.
+- Installeret resource: `/local/ha-home-status-card/ha-home-status-card.js?v=0.8.0`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-balanced-desktop-all-rooms-20260911-172000`.
+
 - Version 0.7.0 erstatter tekniklisten med seks kompakte rumfliser inspireret
   af Temperaturer & termostatmål: aktuel temperatur, setpunkt, rumikon og
   blå/orange afvigelsesaccent. Temperaturdelen har nu mere bredde end den
