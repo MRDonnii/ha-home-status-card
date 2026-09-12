@@ -1,5 +1,12 @@
 # HA Home Status Grid Card
 
+## Neutral mobile preview
+
+![Neutral mobile preview of ha-home-status-grid-card](docs/preview.png)
+
+> Rendered at 390 px mobile width with fictional Home Assistant entities and values. No private dashboard, person, address, camera, or sensor data is included.
+
+
 Aktuel version: **0.8.18**. Bil-preset åbner en lade-popup, når Monta-kablet er tilsluttet, og ellers det samlede Tesla Vehicle Center på `/teknik-overblik/tesla`. Popupens luk-knap ligger frit over kortet og dækker ikke statusbadgen.
 
 Én JavaScript-pakke med et konfigurerbart knapkort. Indsæt kortet så mange gange som ønsket, og vælg den funktion der passer til hver knap.
