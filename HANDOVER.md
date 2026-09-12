@@ -6,6 +6,7 @@
 - Popup’en viser pris nu, planlagt start/slut, ladetid og beregnet sluttid ved start nu samt Lad nu, Stop og navigation til hele Tesla-siden.
 - Almindelige `hass`-opdateringer genbruger forsidekortets og popup’ens eksisterende DOM. Popup’en lukkes og eventlisteners fjernes ved disconnect.
 - Livefil og HTTP-resource matcher repo med SHA-256 `a881b5a52cbb0d1fe99d7092e312f6ff117b56ff217cb9adfa706f46a7bf3ac2`.
+- Commit `a21eee9`, tag og GitHub Release `v0.8.17` er pushed/publiceret.
 - Backup: `/mnt/ha-config/_archive/backups/lovelace/tesla-home-charge-popup-20260912-110259`.
 
 ## 2026-09-12 — v0.8.16 Tesla-link
