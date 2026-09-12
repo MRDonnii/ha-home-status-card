@@ -1,5 +1,13 @@
 # Handover
 
+## 2026-09-12 — v0.8.17 kabelstyret Tesla-popup
+
+- Bil-kortet åbner en kompakt `ha-tesla-charge-popup-card`, når `binary_sensor.monta_th_bil_lader_cable_plugged_in` er `on`; ellers navigerer det fortsat direkte til `/teknik-overblik/tesla`.
+- Popup’en viser pris nu, planlagt start/slut, ladetid og beregnet sluttid ved start nu samt Lad nu, Stop og navigation til hele Tesla-siden.
+- Almindelige `hass`-opdateringer genbruger forsidekortets og popup’ens eksisterende DOM. Popup’en lukkes og eventlisteners fjernes ved disconnect.
+- Livefil og HTTP-resource matcher repo med SHA-256 `a881b5a52cbb0d1fe99d7092e312f6ff117b56ff217cb9adfa706f46a7bf3ac2`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/tesla-home-charge-popup-20260912-110259`.
+
 ## 2026-09-12 — v0.8.16 Tesla-link
 
 - EV-presetets navigation er rettet fra `/teknik-overblik/ev-overblik` til `/teknik-overblik/tesla`.

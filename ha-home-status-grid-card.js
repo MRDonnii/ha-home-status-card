@@ -1,4 +1,4 @@
-const VERSION = "0.8.16";
+const VERSION = "0.8.17";
 
 const PRESETS = {
   home_energy: {
@@ -33,6 +33,7 @@ const PRESETS = {
     daily_entity: "sensor.tesla_daglig_ladning",
     schedule_entity: "sensor.monta_th_bil_lader_last_charge",
     charger_state_entity: "sensor.monta_th_bil_lader_state",
+    cable_entity: "binary_sensor.monta_th_bil_lader_cable_plugged_in",
     navigation_path: "/teknik-overblik/tesla",
     value_unit: "%",
   },
@@ -147,6 +148,7 @@ class HaHomeStatusCard extends HTMLElement {
       cfg.daily_entity,
       cfg.schedule_entity,
       cfg.charger_state_entity,
+      cfg.cable_entity,
       cfg.fallback_daily_entity,
       cfg.status_entity,
       cfg.active_entity,
@@ -175,6 +177,7 @@ class HaHomeStatusCard extends HTMLElement {
 
   set hass(hass) {
     this._hass = hass;
+    if (this._popupCard) this._popupCard.hass = hass;
     const ids = this._watchedIds();
     const sig = JSON.stringify(
       ids.map((id) => [id, hass?.states?.[id]?.state]),
@@ -564,6 +567,10 @@ class HaHomeStatusCard extends HTMLElement {
   }
 
   action(item) {
+    if (item.type === "ev" && this.on(item.cable_entity)) {
+      this._openEvPopup(item);
+      return;
+    }
     if (item.navigation_path) {
       history.pushState(null, "", item.navigation_path);
       window.dispatchEvent(new Event("location-changed"));
@@ -577,6 +584,47 @@ class HaHomeStatusCard extends HTMLElement {
       );
     }
   }
+
+  _openEvPopup(item) {
+    if (this._popupEl) return;
+    const PopupCard = customElements.get("ha-tesla-charge-popup-card");
+    if (!PopupCard) {
+      history.pushState(null, "", item.navigation_path);
+      window.dispatchEvent(new Event("location-changed"));
+      return;
+    }
+    const backdrop = document.createElement("div");
+    backdrop.style.cssText = "position:fixed;inset:0;z-index:999999;background:rgba(8,12,18,.68);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:16px";
+    const panel = document.createElement("div");
+    panel.style.cssText = "position:relative;width:100%;max-width:520px;max-height:92vh;overflow:auto;border-radius:20px;box-shadow:0 28px 70px rgba(0,0,0,.5)";
+    const close = document.createElement("button");
+    close.textContent = "Luk ✕";
+    close.setAttribute("aria-label", "Luk lade-popup");
+    close.style.cssText = "position:absolute;top:12px;right:12px;z-index:3;padding:7px 11px;border:0;border-radius:999px;background:rgba(0,0,0,.5);color:#fff;font:inherit;font-size:11px;font-weight:800;cursor:pointer";
+    const card = new PopupCard();
+    card.setConfig({ navigation_path: item.navigation_path });
+    card.hass = this._hass;
+    panel.append(close, card);
+    backdrop.appendChild(panel);
+    backdrop.addEventListener("click", (event) => { if (event.target === backdrop) this._closeEvPopup(); });
+    card.addEventListener("tesla-popup-close", () => this._closeEvPopup());
+    close.addEventListener("click", () => this._closeEvPopup());
+    this._escHandler = (event) => { if (event.key === "Escape") this._closeEvPopup(); };
+    document.addEventListener("keydown", this._escHandler);
+    document.body.appendChild(backdrop);
+    this._popupEl = backdrop;
+    this._popupCard = card;
+  }
+
+  _closeEvPopup() {
+    this._popupEl?.remove();
+    this._popupEl = null;
+    this._popupCard = null;
+    if (this._escHandler) document.removeEventListener("keydown", this._escHandler);
+    this._escHandler = null;
+  }
+
+  disconnectedCallback() { this._closeEvPopup(); }
 
   render() {
     if (!this.config || !this._hass) return;

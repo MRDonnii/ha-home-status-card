@@ -1,5 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
+<script src="../../ha-tesla-vehicle-card/ha-tesla-vehicle-card.js"></script>
 <script src="../ha-home-status-grid-card.js"></script>
 <script>
   addEventListener("DOMContentLoaded", () => {
@@ -9,6 +10,12 @@
       "sensor.tesla_daglig_ladning": { state: "0", attributes: {} },
       "sensor.monta_th_bil_lader_last_charge": { state: "scheduled", attributes: {} },
       "sensor.monta_th_bil_lader_state": { state: "busy-scheduled", attributes: {} },
+      "binary_sensor.monta_th_bil_lader_cable_plugged_in": { state: "on", attributes: {} },
+      "switch.monta_th_bil_lader_start_stop": { state: "on", attributes: {} },
+      "sensor.tesla_best_charge_start_text_by_deadline": { state: "23:15", attributes: {} },
+      "sensor.tesla_best_charge_end_text_by_deadline": { state: "04:32", attributes: {} },
+      "sensor.energitte_charging_price_estimate": { state: "59.92", attributes: {} },
+      "sensor.tesla_charge_minutes_needed": { state: "317", attributes: {} },
       "sensor.th_charger_current_phase_1": { state: "0", attributes: {} },
       "sensor.th_charger_current_phase_2": { state: "0", attributes: {} },
       "sensor.th_charger_current_phase_3": { state: "0", attributes: {} },
@@ -32,6 +39,12 @@
     };
     const stableAfterRelevant = card.shadowRoot.querySelector(".item") === originalButton;
     const charging = card.shadowRoot.querySelector(".detail").textContent;
-    document.title = JSON.stringify({ planned, charging, stableAfterIrrelevant, stableAfterRelevant });
+    originalButton.click();
+    const popup = document.body.querySelector("ha-tesla-charge-popup-card");
+    const popupOpened = !!popup;
+    const popupStartEnabled = popup && !popup.shadowRoot.querySelector('[data-action="start"]').disabled;
+    const popupNavigation = popup?.config?.navigation_path;
+    document.documentElement.dataset.test = planned === "Planlagt" && stableAfterIrrelevant && stableAfterRelevant && popupOpened && popupStartEnabled && popupNavigation === "/teknik-overblik/tesla" ? "pass" : "fail";
+    document.title = JSON.stringify({ planned, charging, stableAfterIrrelevant, stableAfterRelevant, popupOpened, popupStartEnabled, popupNavigation });
   });
 </script>
