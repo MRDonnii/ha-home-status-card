@@ -1,5 +1,13 @@
 # Handover
 
+## 2026-09-12 — v0.8.16 Tesla-link
+
+- EV-presetets navigation er rettet fra `/teknik-overblik/ev-overblik` til `/teknik-overblik/tesla`.
+- Ingen renderlogik eller DOM-struktur er ændret; EV-planens node-stabilitetstest består.
+- Livefil og HTTP-resource matcher repo med SHA-256 `116e635aefc8297bf7d854166f1b7a448cb668e36f931e5dbe9b77aa855540f5`.
+- Commit `a891a4c`, tag og GitHub Release `v0.8.16` er pushed/publiceret.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/home-status-tesla-link-20260912-104820`.
+
 - Version 0.8.13 komprimerer statusrækkerne til 72 px på korte PC-viewports
   og giver kalenderen mere bredde (1,25/0,75 i stedet for 1,7/0,55), mens
   temperaturerne fortsat står i tre kolonner. Mobil er uændret.
