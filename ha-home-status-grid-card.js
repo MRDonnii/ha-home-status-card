@@ -1,4 +1,5 @@
-const VERSION = "0.8.18";
+import "./ha-home-status-assets.js";
+const VERSION = "0.8.19";
 
 const PRESETS = {
   home_energy: {
@@ -379,7 +380,7 @@ class HaHomeStatusCard extends HTMLElement {
       const doorColor = doors
         ? "var(--warning-color, #f59e0b)"
         : "var(--dashboard-icon-muted, var(--disabled-text-color, #64748b))";
-      label = `<span class="security-row"><span><img src="/local/billeder/security-status/verisure-brand-icon.png"><ha-icon icon="${vIcon}" style="color:${vColor}"></ha-icon></span><span><img src="/local/billeder/security-status/ajax-brand-icon.png"><ha-icon icon="${aIcon}" style="color:${aColor}"></ha-icon></span><span><ha-icon icon="${windows ? "mdi:window-open-variant" : "mdi:window-closed-variant"}" style="color:${windowColor}"></ha-icon><b style="color:${windowColor}">${windows}</b></span><span><ha-icon icon="${doors ? "mdi:door-open" : "mdi:door-closed"}" style="color:${doorColor}"></ha-icon><b style="color:${doorColor}">${doors}</b></span></span>`;
+      label = `<span class="security-row"><span><img src="${window.HAHomeStatusAssets?.security?.["verisure-brand-icon"] || ""}"><ha-icon icon="${vIcon}" style="color:${vColor}"></ha-icon></span><span><img src="${window.HAHomeStatusAssets?.security?.["ajax-brand-icon"] || ""}"><ha-icon icon="${aIcon}" style="color:${aColor}"></ha-icon></span><span><ha-icon icon="${windows ? "mdi:window-open-variant" : "mdi:window-closed-variant"}" style="color:${windowColor}"></ha-icon><b style="color:${windowColor}">${windows}</b></span><span><ha-icon icon="${doors ? "mdi:door-open" : "mdi:door-closed"}" style="color:${doorColor}"></ha-icon><b style="color:${doorColor}">${doors}</b></span></span>`;
     } else if (type === "heating") {
       const heating = /opvarm|til|heat/.test(
         this.text(cfg.heating_entity, "").toLowerCase(),
@@ -540,15 +541,15 @@ class HaHomeStatusCard extends HTMLElement {
       const icons = [
         [
           "binary_sensor.vaskemaskine_korer",
-          "/local/hvidevarer/vaskemaskine2_running.png",
+          window.HAHomeStatusAssets?.appliances?.vaskemaskine2_running || "",
         ],
         [
           "binary_sensor.torretumbler_korer",
-          "/local/hvidevarer/toerretumbler2_running.png",
+          window.HAHomeStatusAssets?.appliances?.toerretumbler2_running || "",
         ],
         [
           "binary_sensor.opvaskemaskine_korer",
-          "/local/hvidevarer/opvaskemaskine2_running.png",
+          window.HAHomeStatusAssets?.appliances?.opvaskemaskine2_running || "",
         ],
       ].filter(([id]) => this.on(id));
       return icons.length
