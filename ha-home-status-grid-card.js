@@ -1,4 +1,4 @@
-const VERSION = "0.8.13";
+const VERSION = "0.8.16";
 
 const PRESETS = {
   home_energy: {
@@ -33,7 +33,7 @@ const PRESETS = {
     daily_entity: "sensor.tesla_daglig_ladning",
     schedule_entity: "sensor.monta_th_bil_lader_last_charge",
     charger_state_entity: "sensor.monta_th_bil_lader_state",
-    navigation_path: "/teknik-overblik/ev-overblik",
+    navigation_path: "/teknik-overblik/tesla",
     value_unit: "%",
   },
   electricity_price: {

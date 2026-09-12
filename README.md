@@ -1,5 +1,7 @@
 # HA Home Status Grid Card
 
+Aktuel version: **0.8.16**. Bil-preset åbner det samlede Tesla Vehicle Center på `/teknik-overblik/tesla`.
+
 Én JavaScript-pakke med et konfigurerbart knapkort. Indsæt kortet så mange gange som ønsket, og vælg den funktion der passer til hver knap.
 
 ```yaml
