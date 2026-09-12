@@ -1,5 +1,7 @@
 # HA Home Status Grid Card
 
+Logo- og apparatikoner er indlejret i `ha-home-status-assets.js`, som HACS downloader sammen med hovedkortet. Ved manuel installation skal begge JavaScript-filer kopieres til samme mappe; kortet kræver ikke de private `/local/billeder`- eller `/local/hvidevarer`-mapper.
+
 ## Neutral mobile preview
 
 ![Neutral mobile preview of ha-home-status-grid-card](docs/preview.png)
