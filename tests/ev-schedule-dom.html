@@ -44,7 +44,10 @@
     const popupOpened = !!popup;
     const popupStartEnabled = popup && !popup.shadowRoot.querySelector('[data-action="start"]').disabled;
     const popupNavigation = popup?.config?.navigation_path;
-    document.documentElement.dataset.test = planned === "Planlagt" && stableAfterIrrelevant && stableAfterRelevant && popupOpened && popupStartEnabled && popupNavigation === "/teknik-overblik/tesla" ? "pass" : "fail";
-    document.title = JSON.stringify({ planned, charging, stableAfterIrrelevant, stableAfterRelevant, popupOpened, popupStartEnabled, popupNavigation });
+    const popupWrapperAccent = popup?.shadowRoot.querySelector(".wrap")?.style.borderLeft;
+    const close = document.body.querySelector('button[aria-label="Luk lade-popup"]');
+    const closeRaised = close?.style.top === "-22px" && close?.style.minHeight === "42px";
+    document.documentElement.dataset.test = planned === "Planlagt" && stableAfterIrrelevant && stableAfterRelevant && popupOpened && popupStartEnabled && popupNavigation === "/teknik-overblik/tesla" && popupWrapperAccent === "0px" && closeRaised ? "pass" : "fail";
+    document.title = JSON.stringify({ planned, charging, stableAfterIrrelevant, stableAfterRelevant, popupOpened, popupStartEnabled, popupNavigation, popupWrapperAccent, closeRaised });
   });
 </script>

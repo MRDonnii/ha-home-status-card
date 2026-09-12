@@ -1,5 +1,13 @@
 # Handover
 
+## 2026-09-12 — v0.8.18 fri luk-knap på lade-popup
+
+- Lade-popupens luk-knap er gjort 42 px høj og flyttet 22 px over popupens top, så Monta-statusbadgen ikke dækkes.
+- Popup-panelet har en separat afrundet scroller, så knappen kan ligge frit uden at miste scrolling.
+- Tesla-popupens ydre accent er fjernet i Tesla-resource `v0.2.2`; de indre informationskort beholder accenter.
+- Headless og autentificeret livebrowser bekræfter `top:-22px`, `min-height:42px` og wrapper-accent `0px`.
+- Backup: `/mnt/ha-config/_archive/backups/lovelace/popup-close-layout-20260912-112400`.
+
 ## 2026-09-12 — v0.8.17 kabelstyret Tesla-popup
 
 - Bil-kortet åbner en kompakt `ha-tesla-charge-popup-card`, når `binary_sensor.monta_th_bil_lader_cable_plugged_in` er `on`; ellers navigerer det fortsat direkte til `/teknik-overblik/tesla`.

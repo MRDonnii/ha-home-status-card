@@ -1,4 +1,4 @@
-const VERSION = "0.8.17";
+const VERSION = "0.8.18";
 
 const PRESETS = {
   home_energy: {
@@ -596,15 +596,18 @@ class HaHomeStatusCard extends HTMLElement {
     const backdrop = document.createElement("div");
     backdrop.style.cssText = "position:fixed;inset:0;z-index:999999;background:rgba(8,12,18,.68);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:16px";
     const panel = document.createElement("div");
-    panel.style.cssText = "position:relative;width:100%;max-width:520px;max-height:92vh;overflow:auto;border-radius:20px;box-shadow:0 28px 70px rgba(0,0,0,.5)";
+    panel.style.cssText = "position:relative;width:100%;max-width:520px;max-height:92vh;overflow:visible;border-radius:20px;box-shadow:0 28px 70px rgba(0,0,0,.5)";
     const close = document.createElement("button");
     close.textContent = "Luk ✕";
     close.setAttribute("aria-label", "Luk lade-popup");
-    close.style.cssText = "position:absolute;top:12px;right:12px;z-index:3;padding:7px 11px;border:0;border-radius:999px;background:rgba(0,0,0,.5);color:#fff;font:inherit;font-size:11px;font-weight:800;cursor:pointer";
+    close.style.cssText = "position:absolute;top:-22px;right:10px;z-index:4;min-height:42px;padding:10px 16px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(8,12,18,.92);box-shadow:0 8px 20px rgba(0,0,0,.38);color:#fff;font:inherit;font-size:13px;font-weight:800;cursor:pointer";
     const card = new PopupCard();
     card.setConfig({ navigation_path: item.navigation_path });
     card.hass = this._hass;
-    panel.append(close, card);
+    const scroller = document.createElement("div");
+    scroller.style.cssText = "max-height:92vh;overflow:auto;border-radius:20px";
+    scroller.appendChild(card);
+    panel.append(close, scroller);
     backdrop.appendChild(panel);
     backdrop.addEventListener("click", (event) => { if (event.target === backdrop) this._closeEvPopup(); });
     card.addEventListener("tesla-popup-close", () => this._closeEvPopup());
